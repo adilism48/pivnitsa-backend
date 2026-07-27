@@ -24,6 +24,7 @@ services:
       DB_URL: jdbc:postgresql://postgres:5432/pivnitsa
       DB_USERNAME: pivnitsa
       DB_PASSWORD: pivnitsa
+      PORT: 8080
     ports:
       - "8080:8080"
     depends_on:
