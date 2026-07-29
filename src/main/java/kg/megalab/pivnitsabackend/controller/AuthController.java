@@ -1,9 +1,11 @@
 package kg.megalab.pivnitsabackend.controller;
 
 import jakarta.validation.Valid;
+import kg.megalab.pivnitsabackend.dto.CompleteProfileRequest;
 import kg.megalab.pivnitsabackend.dto.SendOtpRequest;
 import kg.megalab.pivnitsabackend.dto.VerifyOtpRequest;
 import kg.megalab.pivnitsabackend.service.OtpService;
+import kg.megalab.pivnitsabackend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +21,7 @@ import java.util.Map;
 public class AuthController {
 
     private final OtpService otpService;
+    private final UserService userService;
 
     @PostMapping("/send-otp")
     public ResponseEntity<Map<String, String>> sendOtp(
@@ -38,6 +41,21 @@ public class AuthController {
 
         return ResponseEntity.ok(
                 Map.of("message", "Номер телефона успешно подтвержден.")
+        );
+    }
+
+    @PostMapping("/complete-profile")
+    public ResponseEntity<Map<String, String>> completeProfile(
+            @Valid @RequestBody CompleteProfileRequest request
+    ) {
+
+        userService.completeProfile(
+                request.phone(),
+                request
+        );
+
+        return ResponseEntity.ok(
+                Map.of("message", "Профиль успешно заполнен.")
         );
     }
 }
