@@ -4,6 +4,7 @@ import kg.megalab.pivnitsabackend.exception.InvalidOtpException;
 import kg.megalab.pivnitsabackend.exception.OtpAlreadySentException;
 import kg.megalab.pivnitsabackend.exception.OtpExpiredException;
 import kg.megalab.pivnitsabackend.exception.TooManyAttemptsException;
+import kg.megalab.pivnitsabackend.security.JwtService;
 import org.springframework.transaction.annotation.Transactional;
 import kg.megalab.pivnitsabackend.entity.NotificationChannel;
 import kg.megalab.pivnitsabackend.entity.OtpCode;
@@ -20,6 +21,7 @@ import java.time.ZoneOffset;
 public class OtpService {
     private static final int MAX_FAILED_ATTEMPTS = 5;
     private final OtpCodeRepository otpCodeRepository;
+    private final JwtService jwtService;
     private final SecureRandom secureRandom = new SecureRandom();
 
     @Transactional(noRollbackFor = {
@@ -27,7 +29,7 @@ public class OtpService {
             TooManyAttemptsException.class,
             OtpExpiredException.class
     })
-    public void verifyOtp(String phone, String code) {
+    public String verifyOtp(String phone, String code) {
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
 
         OtpCode otpCode = otpCodeRepository.findTopByPhoneOrderByCreatedAtDesc(phone)
@@ -58,6 +60,8 @@ public class OtpService {
         }
         otpCode.setVerified(true);
         otpCodeRepository.save(otpCode);
+        String token = jwtService.generateToken(phone);
+        return token;
     }
 
     @Transactional

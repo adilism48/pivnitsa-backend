@@ -8,10 +8,7 @@ import kg.megalab.pivnitsabackend.service.OtpService;
 import kg.megalab.pivnitsabackend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -33,26 +30,27 @@ public class AuthController {
                 Map.of("message", "Код успешно отправлен.")
         );
     }
+
     @PostMapping("/verify-otp")
-    public ResponseEntity<Map<String, String>> verifyOtp(
-            @Valid @RequestBody VerifyOtpRequest request
-    ) {
-        otpService.verifyOtp(request.phone(), request.code());
+    public ResponseEntity<Map<String, String>> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
+        String token = otpService.verifyOtp(request.phone(), request.code());
 
         return ResponseEntity.ok(
-                Map.of("message", "Номер телефона успешно подтвержден.")
+                Map.of(
+                        "message", "Номер телефона успешно подтвержден.",
+                        "token", token
+                )
         );
     }
 
     @PostMapping("/complete-profile")
     public ResponseEntity<Map<String, String>> completeProfile(
+            @RequestHeader("Authorization") String authHeader,
             @Valid @RequestBody CompleteProfileRequest request
     ) {
 
-        userService.completeProfile(
-                request.phone(),
-                request
-        );
+        userService.completeProfile(authHeader, request);
+
 
         return ResponseEntity.ok(
                 Map.of("message", "Профиль успешно заполнен.")
