@@ -24,7 +24,7 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> sendOtp(
             @Valid @RequestBody SendOtpRequest request
     ) {
-        otpService.sendOtp(request.phone());
+        otpService.sendOtp(request.phone(), request.channel());
 
         return ResponseEntity.ok(
                 Map.of("message", "Код успешно отправлен.")
@@ -33,12 +33,13 @@ public class AuthController {
 
     @PostMapping("/verify-otp")
     public ResponseEntity<Map<String, String>> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
-        String token = otpService.verifyOtp(request.phone(), request.code());
+        String preAuthToken = otpService.verifyOtp(request.phone(), request.code());
 
         return ResponseEntity.ok(
                 Map.of(
                         "message", "Номер телефона успешно подтвержден.",
-                        "token", token
+                        "token", preAuthToken,
+                        "stage", "PROFILE_REQUIRED"
                 )
         );
     }
@@ -50,7 +51,6 @@ public class AuthController {
     ) {
 
         userService.completeProfile(authHeader, request);
-
 
         return ResponseEntity.ok(
                 Map.of("message", "Профиль успешно заполнен.")
