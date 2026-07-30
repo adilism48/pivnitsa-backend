@@ -1,28 +1,65 @@
 package kg.megalab.pivnitsabackend.service;
 
+import kg.megalab.pivnitsabackend.entity.NotificationChannel;
+import kg.megalab.pivnitsabackend.entity.OtpCode;
 import kg.megalab.pivnitsabackend.exception.InvalidOtpException;
 import kg.megalab.pivnitsabackend.exception.OtpAlreadySentException;
 import kg.megalab.pivnitsabackend.exception.OtpExpiredException;
 import kg.megalab.pivnitsabackend.exception.TooManyAttemptsException;
-import kg.megalab.pivnitsabackend.security.JwtService;
-import org.springframework.transaction.annotation.Transactional;
-import kg.megalab.pivnitsabackend.entity.NotificationChannel;
-import kg.megalab.pivnitsabackend.entity.OtpCode;
+import kg.megalab.pivnitsabackend.otp.OtpDispatcherService;
 import kg.megalab.pivnitsabackend.repository.OtpCodeRepository;
+import kg.megalab.pivnitsabackend.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
 @Service
 @RequiredArgsConstructor
 public class OtpService {
+
     private static final int MAX_FAILED_ATTEMPTS = 5;
+    private static final long COOLDOWN_SECONDS = 60;
+
     private final OtpCodeRepository otpCodeRepository;
     private final JwtService jwtService;
+    private final OtpDispatcherService otpDispatcherService;
     private final SecureRandom secureRandom = new SecureRandom();
+
+    @Transactional
+    public void sendOtp(String phone, NotificationChannel channel) {
+        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+
+        otpCodeRepository.findTopByPhoneOrderByCreatedAtDesc(phone)
+                .filter(last -> last.getSentAt().isAfter(now.minusSeconds(COOLDOWN_SECONDS)))
+                .ifPresent(last -> {
+                    long secondsLeft = COOLDOWN_SECONDS
+                            - Duration.between(last.getSentAt(), now).getSeconds();
+
+                    throw new OtpAlreadySentException(
+                            "Повторная отправка будет доступна через " + secondsLeft + " сек.",
+                            Math.max(secondsLeft, 1)
+                    );
+                });
+
+        String code = generateOtp();
+
+        OtpCode otpCode = OtpCode.builder()
+                .phone(phone)
+                .code(code)
+                .channel(channel)
+                .sentAt(now)
+                .expiresAt(now.plusMinutes(5))
+                .build();
+
+        otpCodeRepository.save(otpCode);
+
+        otpDispatcherService.dispatch(phone, code, channel);
+    }
 
     @Transactional(noRollbackFor = {
             InvalidOtpException.class,
@@ -58,35 +95,11 @@ public class OtpService {
 
             throw new InvalidOtpException("Неверный код");
         }
+
         otpCode.setVerified(true);
         otpCodeRepository.save(otpCode);
-        String token = jwtService.generateToken(phone);
-        return token;
-    }
 
-    @Transactional
-    public void sendOtp(String phone) {
-        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-
-        boolean recentlySent = otpCodeRepository.existsByPhoneAndSentAtAfter(phone, now.minusMinutes(1));
-
-        if(recentlySent) {
-            throw new OtpAlreadySentException("Код уже отправлен. Повторите попытку через 1 минуту.");
-        }
-
-        String code = generateOtp();
-
-        OtpCode otpCode = OtpCode.builder()
-                .phone(phone)
-                .code(code)
-                .channel(NotificationChannel.SMS)
-                .sentAt(now)
-                .expiresAt(now.plusMinutes(5))
-                .build();
-
-        otpCodeRepository.save(otpCode);
-
-        System.out.println("OTP code for " + phone + ": " + code);
+        return jwtService.generatePreAuthToken(phone);
     }
 
     private String generateOtp() {
