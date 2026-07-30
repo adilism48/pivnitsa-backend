@@ -15,6 +15,23 @@ spring:
   flyway:
     enabled: true
 
+jwt:
+  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+otp:
+  nikita:
+    enabled: ${NIKITA_OTP_ENABLED:false}
+    api-url: ${NIKITA_API_URL:https://smspro.nikita.kg/api/message}
+    login: ${NIKITA_LOGIN:}
+    password: ${NIKITA_PASSWORD:}
+    sender: ${NIKITA_SENDER:SMSPRO.KG}
+  infobip:
+    enabled: ${INFOBIP_OTP_ENABLED:false}
+    base-url: ${INFOBIP_BASE_URL:}
+    api-key: ${INFOBIP_API_KEY:}
+    sender: ${INFOBIP_SENDER:Pivnitsa}
+
 management:
   endpoints:
     web:
