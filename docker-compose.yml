@@ -16,7 +16,6 @@ services:
       timeout: 5s
       retries: 10
     restart: unless-stopped
-
   backend:
     build: .
     container_name: pivnitsa-backend
@@ -25,12 +24,20 @@ services:
       DB_USERNAME: pivnitsa
       DB_PASSWORD: pivnitsa
       PORT: 8080
+      JWT_SECRET: ${JWT_SECRET}
+      NIKITA_OTP_ENABLED: ${NIKITA_OTP_ENABLED}
+      NIKITA_LOGIN: ${NIKITA_LOGIN}
+      NIKITA_PASSWORD: ${NIKITA_PASSWORD}
+      NIKITA_SENDER: ${NIKITA_SENDER}
+      INFOBIP_OTP_ENABLED: ${INFOBIP_OTP_ENABLED}
+      INFOBIP_BASE_URL: ${INFOBIP_BASE_URL}
+      INFOBIP_API_KEY: ${INFOBIP_API_KEY}
+      INFOBIP_SENDER: ${INFOBIP_SENDER}
     ports:
       - "8080:8080"
     depends_on:
       postgres:
         condition: service_healthy
     restart: unless-stopped
-
 volumes:
   postgres-data:
