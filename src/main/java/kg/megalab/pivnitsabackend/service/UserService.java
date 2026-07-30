@@ -3,9 +3,7 @@ package kg.megalab.pivnitsabackend.service;
 import kg.megalab.pivnitsabackend.dto.CompleteProfileRequest;
 import kg.megalab.pivnitsabackend.entity.User;
 import kg.megalab.pivnitsabackend.repository.UserRepository;
-import kg.megalab.pivnitsabackend.security.JwtService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,18 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final JwtService jwtService;
-
 
     @Transactional
-    public User completeProfile(String authHeader, CompleteProfileRequest request) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new IllegalArgumentException("Неверный формат заголовка Authorization");
-        }
-
-        String token = authHeader.substring(7);
-        String phone = jwtService.extractPhone(token);
-
+    public User completeProfile(String phone, CompleteProfileRequest request) {
         return userRepository.findByPhone(phone)
                 .map(existingUser -> {
                     existingUser.setFirstName(request.firstName());
