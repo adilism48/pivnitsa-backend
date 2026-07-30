@@ -13,6 +13,10 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
+    public static final String SCOPE_CLAIM = "scope";
+    public static final String SCOPE_PRE_AUTH = "PRE_AUTH";
+    public static final String SCOPE_FULL_ACCESS = "FULL_ACCESS";
+    private static final long PRE_AUTH_TTL_MILLIS = 10 * 60 * 1000;
 
     @Value("${jwt.secret}")
     private String secretKey;
@@ -20,17 +24,30 @@ public class JwtService {
     @Value("${jwt.expiration}")
     private long jwtExpiration;
 
-    public String generateToken(String phone) {
+    public String generatePreAuthToken(String phone) {
+        return buildToken(phone, SCOPE_PRE_AUTH, PRE_AUTH_TTL_MILLIS);
+    }
+
+    public String generateAccessToken(String phone) {
+        return buildToken(phone, SCOPE_FULL_ACCESS, jwtExpiration);
+    }
+
+    private String buildToken(String phone, String scope, long ttlMillis) {
         return Jwts.builder()
                 .subject(phone)
+                .claim(SCOPE_CLAIM, scope)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .expiration(new Date(System.currentTimeMillis() + ttlMillis))
                 .signWith(getSigningKey())
                 .compact();
     }
 
     public String extractPhone(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    public String extractScope(String token) {
+        return extractClaim(token, claims -> claims.get(SCOPE_CLAIM, String.class));
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -40,7 +57,7 @@ public class JwtService {
 
     public boolean isTokenValid(String token, String phone) {
         final String extractedPhone = extractPhone(token);
-        return (extractedPhone.equals(phone)) && !isTokenExpired(token);
+        return extractedPhone.equals(phone) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {
