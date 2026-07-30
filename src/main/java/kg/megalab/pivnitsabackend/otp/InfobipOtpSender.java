@@ -3,9 +3,11 @@ package kg.megalab.pivnitsabackend.otp;
 import kg.megalab.pivnitsabackend.entity.NotificationChannel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 @Slf4j
+@Order(2)
 @Component
 public class InfobipOtpSender implements OtpSender {
 
