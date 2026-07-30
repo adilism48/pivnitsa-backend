@@ -11,6 +11,7 @@ import java.time.ZoneOffset;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
     @ExceptionHandler(OtpAlreadySentException.class)
     public ResponseEntity<ErrorResponse> handleOtpAlreadySent(OtpAlreadySentException ex, HttpServletRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(
@@ -18,9 +19,13 @@ public class GlobalExceptionHandler {
                 HttpStatus.TOO_MANY_REQUESTS.value(),
                 HttpStatus.TOO_MANY_REQUESTS.getReasonPhrase(),
                 ex.getMessage(),
-                request.getRequestURI()
+                request.getRequestURI(),
+                ex.getRetryAfterSeconds()
         );
-        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(errorResponse);
+
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header("Retry-After", String.valueOf(ex.getRetryAfterSeconds()))
+                .body(errorResponse);
     }
 
     @ExceptionHandler({
