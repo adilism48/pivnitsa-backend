@@ -1,7 +1,9 @@
 package kg.megalab.pivnitsabackend.service;
 
 import kg.megalab.pivnitsabackend.dto.CompleteProfileRequest;
+import kg.megalab.pivnitsabackend.dto.UserResponse;
 import kg.megalab.pivnitsabackend.entity.User;
+import kg.megalab.pivnitsabackend.exception.UserNotFoundException;
 import kg.megalab.pivnitsabackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -35,5 +37,20 @@ public class UserService {
                             .build();
                     return userRepository.save(newUser);
                 });
+    }
+
+    public UserResponse getCurrentUser(String phone) {
+        User user = userRepository.findByPhone(phone)
+                .filter(User::isPhoneVerified)
+                .orElseThrow(() ->
+                        new UserNotFoundException("Пользователь не найден")
+                );
+
+        return new UserResponse(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getPhone()
+        );
     }
 }
