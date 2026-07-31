@@ -1,6 +1,7 @@
 package kg.megalab.pivnitsabackend.entity;
 
 import jakarta.persistence.*;
+import kg.megalab.pivnitsabackend.otp.OtpPurpose;
 import lombok.*;
 
 import java.time.OffsetDateTime;
@@ -53,6 +54,10 @@ public class OtpCode {
     @Column(nullable = false)
     @Builder.Default
     private boolean verified = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private OtpPurpose purpose;
 
     @PrePersist
     protected void onCreate() {

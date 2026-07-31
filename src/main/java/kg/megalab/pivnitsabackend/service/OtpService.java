@@ -7,6 +7,7 @@ import kg.megalab.pivnitsabackend.exception.OtpAlreadySentException;
 import kg.megalab.pivnitsabackend.exception.OtpExpiredException;
 import kg.megalab.pivnitsabackend.exception.TooManyAttemptsException;
 import kg.megalab.pivnitsabackend.otp.OtpDispatcherService;
+import kg.megalab.pivnitsabackend.otp.OtpPurpose;
 import kg.megalab.pivnitsabackend.repository.OtpCodeRepository;
 import kg.megalab.pivnitsabackend.security.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -26,15 +27,14 @@ public class OtpService {
     private static final long COOLDOWN_SECONDS = 60;
 
     private final OtpCodeRepository otpCodeRepository;
-    private final JwtService jwtService;
     private final OtpDispatcherService otpDispatcherService;
     private final SecureRandom secureRandom = new SecureRandom();
 
     @Transactional
-    public void sendOtp(String phone, NotificationChannel channel) {
+    public void sendOtp(String phone, NotificationChannel channel, OtpPurpose purpose) {
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
 
-        otpCodeRepository.findTopByPhoneOrderByCreatedAtDesc(phone)
+        otpCodeRepository.findTopByPhoneAndPurposeOrderByCreatedAtDesc(phone, purpose)
                 .filter(last -> last.getSentAt().isAfter(now.minusSeconds(COOLDOWN_SECONDS)))
                 .ifPresent(last -> {
                     long secondsLeft = COOLDOWN_SECONDS
@@ -52,6 +52,7 @@ public class OtpService {
                 .phone(phone)
                 .code(code)
                 .channel(channel)
+                .purpose(purpose)
                 .sentAt(now)
                 .expiresAt(now.plusMinutes(5))
                 .build();
@@ -66,10 +67,10 @@ public class OtpService {
             TooManyAttemptsException.class,
             OtpExpiredException.class
     })
-    public String verifyOtp(String phone, String code) {
+    public void verifyOtp(String phone, String code, OtpPurpose purpose) {
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
 
-        OtpCode otpCode = otpCodeRepository.findTopByPhoneOrderByCreatedAtDesc(phone)
+        OtpCode otpCode = otpCodeRepository.findTopByPhoneAndPurposeOrderByCreatedAtDesc(phone, purpose)
                 .orElseThrow(() -> new InvalidOtpException("Код не найден"));
 
         if (otpCode.isVerified()) {
@@ -98,12 +99,11 @@ public class OtpService {
 
         otpCode.setVerified(true);
         otpCodeRepository.save(otpCode);
-
-        return jwtService.generatePreAuthToken(phone);
     }
 
     private String generateOtp() {
         int number = 100000 + secureRandom.nextInt(900000);
         return String.valueOf(number);
     }
+
 }

@@ -82,6 +82,170 @@ GET /actuator/health
 Интерактивная документация реализованных endpoint'ов автоматически формируется
 в формате OpenAPI и доступна в Swagger UI после запуска приложения.
 
+### US-03 — регистрация по номеру телефона
+
+#### 1. Отправить OTP
+
+```http
+POST /api/v1/auth/send-otp
+Content-Type: application/json
+```
+
+```json
+{
+  "phone": "+77001234567",
+  "channel": "SMS"
+}
+```
+
+Успешный ответ — `200 OK`:
+
+```json
+{
+  "message": "Код успешно отправлен."
+}
+```
+
+#### 2. Подтвердить OTP
+
+```http
+POST /api/v1/auth/verify-otp
+Content-Type: application/json
+```
+
+```json
+{
+  "phone": "+77001234567",
+  "code": "123456"
+}
+```
+
+Успешный ответ:
+
+```json
+{
+  "message": "Номер телефона успешно подтвержден.",
+  "token": "eyJ...",
+  "stage": "PROFILE_REQUIRED"
+}
+```
+
+Полученный токен является временным и используется только для завершения регистрации.
+
+#### 3. Заполнить профиль
+
+```http
+POST /api/v1/auth/complete-profile
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+```json
+{
+  "firstName": "Иван",
+  "lastName": "Иванов",
+  "termsAccepted": true,
+  "privacyAccepted": true
+}
+```
+
+Успешный ответ:
+
+```json
+{
+  "message": "Профиль успешно заполнен.",
+  "token": "eyJ...",
+  "stage": "AUTHENTICATED",
+  "user": {
+    "id": 1,
+    "firstName": "Иван",
+    "lastName": "Иванов",
+    "phone": "+77001234567"
+  }
+}
+```
+
+Полученный токен предоставляет полный доступ к приложению.
+
+### US-04 — вход по номеру телефона
+
+#### 1. Отправить OTP
+
+```http
+POST /api/v1/auth/login/send-otp
+Content-Type: application/json
+```
+
+```json
+{
+  "phone": "+77001234567",
+  "channel": "SMS"
+}
+```
+
+Успешный ответ:
+
+```json
+{
+  "message": "Код для входа успешно отправлен.",
+  "retryAfterSeconds": 60
+}
+```
+
+#### 2. Подтвердить OTP и войти
+
+```http
+POST /api/v1/auth/login/verify-otp
+Content-Type: application/json
+```
+
+```json
+{
+  "phone": "+77001234567",
+  "code": "123456"
+}
+```
+
+Успешный ответ:
+
+```json
+{
+  "accessToken": "eyJ...",
+  "tokenType": "Bearer",
+  "stage": "FULL_ACCESS",
+  "user": {
+    "id": 1,
+    "firstName": "Иван",
+    "lastName": "Иванов",
+    "phone": "+77001234567"
+  }
+}
+```
+
+#### 3. Проверить сохранённую сессию
+
+```http
+GET /api/v1/users/me
+Authorization: Bearer <accessToken>
+```
+
+Успешный ответ:
+
+```json
+{
+  "id": 1,
+  "firstName": "Иван",
+  "lastName": "Иванов",
+  "phone": "+77001234567"
+}
+```
+
+Мобильное приложение сохраняет токен в защищённом хранилище и вызывает `/api/v1/users/me` при запуске:
+
+- `200` — открыть главный экран без повторного OTP;
+- `401/403` — удалить токен и показать экран входа.
+
+Access token действует 24 часа.
 
 ## База данных
 
