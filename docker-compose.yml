@@ -46,8 +46,10 @@ services:
       INFOBIP_BASE_URL: ${INFOBIP_BASE_URL}
       INFOBIP_API_KEY: ${INFOBIP_API_KEY}
       INFOBIP_SENDER: ${INFOBIP_SENDER}
-      REDIS_HOST: redis
+      REDIS_HOST: ${REDIS_HOST:-redis}
       REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_SSL_ENABLED: ${REDIS_SSL_ENABLED:-false}
     ports:
       - "8080:8080"
     depends_on:

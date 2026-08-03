@@ -23,6 +23,8 @@ spring:
       password: ${REDIS_PASSWORD:}
       timeout: 2s
       connect-timeout: 2s
+      ssl:
+        enabled: ${REDIS_SSL_ENABLED:false}
 
 jwt:
   secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}

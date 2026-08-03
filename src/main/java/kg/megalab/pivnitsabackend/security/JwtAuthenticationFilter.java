@@ -1,12 +1,15 @@
 package kg.megalab.pivnitsabackend.security;
 
+import jakarta.persistence.QueryTimeoutException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kg.megalab.pivnitsabackend.exception.InvalidTokenException;
+import kg.megalab.pivnitsabackend.exception.TokenBlacklistUnavailableException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -74,14 +77,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
 
         } catch (InvalidTokenException e) {
+            log.warn("Ошибка валидации токена: {}", e.getMessage());
             SecurityContextHolder.clearContext();
             handlerExceptionResolver.resolveException(request, response, null, e);
-        } catch (Exception e) {
-            log.debug("Невалидный или просроченный токен для запроса {}: {}",
-                    request.getRequestURI(), e.getMessage());
+        } catch (QueryTimeoutException | RedisConnectionFailureException e) {
+            log.error("Redis недоступен при запросе {}: {}", request.getRequestURI(), e.getMessage(), e);
             SecurityContextHolder.clearContext();
 
-            handlerExceptionResolver.resolveException(request, response, null, new InvalidTokenException("Невалидный или просроченный токен"));
+            handlerExceptionResolver.resolveException(
+                    request,
+                    response,
+                    null,
+                    new TokenBlacklistUnavailableException("База данных токенов недоступна")
+            );
+        } catch (Exception e) {
+            log.error("Непредвиденная ошибка в фильтре для {}: {}", request.getRequestURI(), e.getMessage(), e);
+            SecurityContextHolder.clearContext();
+            handlerExceptionResolver.resolveException(request, response, null, e);
         }
     }
 }
