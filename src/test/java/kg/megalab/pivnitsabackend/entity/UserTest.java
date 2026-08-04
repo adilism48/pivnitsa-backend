@@ -3,6 +3,7 @@ package kg.megalab.pivnitsabackend.entity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class UserTest {
@@ -35,4 +36,6 @@ class UserTest {
         assertThat(user1).isNotEqualTo(user3);
         assertThat(user1.hashCode()).isEqualTo(user2.hashCode());
     }
+
+
 }

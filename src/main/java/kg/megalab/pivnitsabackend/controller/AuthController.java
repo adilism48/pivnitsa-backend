@@ -1,9 +1,11 @@
 package kg.megalab.pivnitsabackend.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
-import kg.megalab.pivnitsabackend.dto.CompleteProfileRequest;
-import kg.megalab.pivnitsabackend.dto.SendOtpRequest;
-import kg.megalab.pivnitsabackend.dto.VerifyOtpRequest;
+import kg.megalab.pivnitsabackend.config.OpenApiConfig;
+import kg.megalab.pivnitsabackend.dto.profile.CompleteProfileRequest;
+import kg.megalab.pivnitsabackend.dto.otp.SendOtpRequest;
+import kg.megalab.pivnitsabackend.dto.otp.VerifyOtpRequest;
 import kg.megalab.pivnitsabackend.entity.User;
 import kg.megalab.pivnitsabackend.otp.OtpPurpose;
 import kg.megalab.pivnitsabackend.security.JwtService;
@@ -54,6 +56,7 @@ public class AuthController {
     }
 
     @PostMapping("/complete-profile")
+    @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
     public ResponseEntity<Map<String, Object>> completeProfile(
             @AuthenticationPrincipal String phone,
             @Valid @RequestBody CompleteProfileRequest request

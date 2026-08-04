@@ -66,7 +66,8 @@ public class LoginService {
                         user.getId(),
                         user.getFirstName(),
                         user.getLastName(),
-                        user.getPhone()
+                        user.getPhone(),
+                        user.getEmail()
                 )
         );
     }
