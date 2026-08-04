@@ -386,6 +386,17 @@ Content-Type: application/json
 После успешной смены номера клиент должен заменить сохранённый access token значением
 `accessToken` из ответа.
 
+### US-06 — Выход из учётной записи
+
+Блокирует текущий JWT-токен пользователя путем добавления его jti в черный список (Blacklist) в Redis.
+
+```http
+POST /api/v1/auth/logout
+Authorization: Bearer <accessToken>
+```
+
+Успешный ответ — `204 No content`:
+
 ## База данных
 
 В локальном окружении используется PostgreSQL 17. Схема создаётся автоматически
