@@ -1,7 +1,7 @@
 package kg.megalab.pivnitsabackend.service;
 
-import kg.megalab.pivnitsabackend.dto.CompleteProfileRequest;
-import kg.megalab.pivnitsabackend.dto.UpdateProfileRequest;
+import kg.megalab.pivnitsabackend.dto.profile.CompleteProfileRequest;
+import kg.megalab.pivnitsabackend.dto.profile.UpdateProfileRequest;
 import kg.megalab.pivnitsabackend.dto.UserResponse;
 import kg.megalab.pivnitsabackend.entity.User;
 import kg.megalab.pivnitsabackend.exception.UserNotFoundException;

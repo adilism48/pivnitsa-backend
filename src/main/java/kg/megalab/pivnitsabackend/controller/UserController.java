@@ -1,7 +1,9 @@
 package kg.megalab.pivnitsabackend.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
-import kg.megalab.pivnitsabackend.dto.UpdateProfileRequest;
+import kg.megalab.pivnitsabackend.config.OpenApiConfig;
+import kg.megalab.pivnitsabackend.dto.profile.UpdateProfileRequest;
 import kg.megalab.pivnitsabackend.dto.UserResponse;
 import kg.megalab.pivnitsabackend.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
+@SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
 public class UserController {
 
     private final UserService userService;

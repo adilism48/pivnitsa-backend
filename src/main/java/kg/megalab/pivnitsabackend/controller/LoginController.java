@@ -2,8 +2,8 @@ package kg.megalab.pivnitsabackend.controller;
 
 import jakarta.validation.Valid;
 import kg.megalab.pivnitsabackend.dto.LoginResponse;
-import kg.megalab.pivnitsabackend.dto.SendOtpRequest;
-import kg.megalab.pivnitsabackend.dto.VerifyOtpRequest;
+import kg.megalab.pivnitsabackend.dto.otp.SendOtpRequest;
+import kg.megalab.pivnitsabackend.dto.otp.VerifyOtpRequest;
 import kg.megalab.pivnitsabackend.service.LoginService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
