@@ -1,5 +1,6 @@
 package kg.megalab.pivnitsabackend.controller;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import kg.megalab.pivnitsabackend.config.OpenApiConfig;
@@ -82,7 +83,10 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authHeader) {
+    @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
+    public ResponseEntity<Void> logout(
+            @Parameter(hidden = true)
+            @RequestHeader("Authorization") String authHeader) {
 
         logoutService.logout(authHeader);
 
