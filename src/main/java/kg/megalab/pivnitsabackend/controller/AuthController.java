@@ -1,5 +1,6 @@
 package kg.megalab.pivnitsabackend.controller;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import kg.megalab.pivnitsabackend.config.OpenApiConfig;
@@ -9,6 +10,7 @@ import kg.megalab.pivnitsabackend.dto.otp.VerifyOtpRequest;
 import kg.megalab.pivnitsabackend.entity.User;
 import kg.megalab.pivnitsabackend.otp.OtpPurpose;
 import kg.megalab.pivnitsabackend.security.JwtService;
+import kg.megalab.pivnitsabackend.security.LogoutService;
 import kg.megalab.pivnitsabackend.service.OtpService;
 import kg.megalab.pivnitsabackend.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ public class AuthController {
     private final OtpService otpService;
     private final UserService userService;
     private final JwtService jwtService;
+    private final LogoutService logoutService;
 
     @PostMapping("/send-otp")
     public ResponseEntity<Map<String, String>> sendOtp(
@@ -77,5 +80,16 @@ public class AuthController {
                         )
                 )
         );
+    }
+
+    @PostMapping("/logout")
+    @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
+    public ResponseEntity<Void> logout(
+            @Parameter(hidden = true)
+            @RequestHeader("Authorization") String authHeader) {
+
+        logoutService.logout(authHeader);
+
+        return ResponseEntity.noContent().build();
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.UUID;
 import java.util.function.Function;
 
 @Service
@@ -34,6 +35,7 @@ public class JwtService {
 
     private String buildToken(String phone, String scope, long ttlMillis) {
         return Jwts.builder()
+                .id(UUID.randomUUID().toString())
                 .subject(phone)
                 .claim(SCOPE_CLAIM, scope)
                 .issuedAt(new Date(System.currentTimeMillis()))
@@ -48,6 +50,10 @@ public class JwtService {
 
     public String extractScope(String token) {
         return extractClaim(token, claims -> claims.get(SCOPE_CLAIM, String.class));
+    }
+
+    public String extractJti(String token) {
+        return extractClaim(token, claims -> claims.get("jti", String.class));
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
