@@ -40,7 +40,6 @@ public class User {
     @Builder.Default
     private boolean termsAccepted = false;
 
-
     @Column(name = "privacy_accepted", nullable = false)
     @Builder.Default
     private boolean privacyAccepted = false;
@@ -50,6 +49,13 @@ public class User {
 
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
+
+    @Column(name = "is_deleted", nullable = false)
+    @Builder.Default
+    private Boolean isDeleted = false;
+
+    @Column(name = "deleted_at")
+    private OffsetDateTime deletedAt;
 
     @PrePersist
     protected void onCreate() {

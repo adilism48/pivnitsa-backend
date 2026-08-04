@@ -4,10 +4,14 @@ import jakarta.validation.Valid;
 import kg.megalab.pivnitsabackend.dto.CompleteProfileRequest;
 import kg.megalab.pivnitsabackend.dto.SendOtpRequest;
 import kg.megalab.pivnitsabackend.dto.VerifyOtpRequest;
+
 import kg.megalab.pivnitsabackend.entity.User;
+
 import kg.megalab.pivnitsabackend.security.JwtService;
+
 import kg.megalab.pivnitsabackend.service.OtpService;
 import kg.megalab.pivnitsabackend.service.UserService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

@@ -26,11 +26,12 @@ public class Booking {
     private Long clubTableId;
 
     @Column(name = "event_id")
-    private Long EventId;
+    private Long eventId;
 
     @Column(name = "booking_at", nullable = false)
     private OffsetDateTime bookingAt;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private BookingStatus status;
 
