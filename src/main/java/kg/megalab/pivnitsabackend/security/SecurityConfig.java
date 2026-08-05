@@ -3,6 +3,7 @@ package kg.megalab.pivnitsabackend.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -42,6 +43,13 @@ public class SecurityConfig {
                                 "/api/v1/auth/login/send-otp",
                                 "/api/v1/auth/login/verify-otp",
                                 "/error"
+                        ).permitAll()
+
+                        // GET Open for non auth user
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/v1/events",
+                                "/api/v1/events/**"
                         ).permitAll()
 
                         .requestMatchers("/api/v1/auth/complete-profile")
