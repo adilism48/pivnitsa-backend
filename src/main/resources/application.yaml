@@ -2,8 +2,6 @@ server:
   port: ${PORT:8080}
 
 spring:
-  server:
-    port: ${PORT:8080}
   application:
     name: pivnitsa-backend
   datasource:
