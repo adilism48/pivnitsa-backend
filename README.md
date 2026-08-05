@@ -51,6 +51,13 @@ docker compose logs -f backend
 docker compose down
 ```
 
+Данные PostgreSQL сохраняются в именованном Docker volume `postgres-data`, поэтому обычный
+`docker compose down` не удаляет базу. Для полного сброса локальных данных используйте:
+
+```bash
+docker compose down -v
+```
+
 После запуска доступны:
 
 | Сервис | Адрес |
@@ -82,6 +89,313 @@ GET /actuator/health
 Интерактивная документация реализованных endpoint'ов автоматически формируется
 в формате OpenAPI и доступна в Swagger UI после запуска приложения.
 
+### JWT-авторизация в Swagger
+
+Чтобы вызвать защищённые endpoint'ы через Swagger UI:
+
+1. Получите `accessToken` через `/api/v1/auth/login/verify-otp`.
+2. Откройте <http://localhost:8080/swagger-ui.html>.
+3. Нажмите **Authorize**.
+4. Вставьте JWT без префикса `Bearer`.
+
+Swagger автоматически добавит заголовок:
+
+```http
+Authorization: Bearer <accessToken>
+```
+
+### US-03 — регистрация по номеру телефона
+
+#### 1. Отправить OTP
+
+```http
+POST /api/v1/auth/send-otp
+Content-Type: application/json
+```
+
+```json
+{
+  "phone": "+996700123456",
+  "channel": "SMS"
+}
+```
+
+Успешный ответ — `200 OK`:
+
+```json
+{
+  "message": "Код успешно отправлен."
+}
+```
+
+#### 2. Подтвердить OTP
+
+```http
+POST /api/v1/auth/verify-otp
+Content-Type: application/json
+```
+
+```json
+{
+  "phone": "+996700123456",
+  "code": "123456"
+}
+```
+
+Успешный ответ:
+
+```json
+{
+  "message": "Номер телефона успешно подтвержден.",
+  "token": "eyJ...",
+  "stage": "PROFILE_REQUIRED"
+}
+```
+
+Полученный токен является временным и используется только для завершения регистрации.
+
+#### 3. Заполнить профиль
+
+```http
+POST /api/v1/auth/complete-profile
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+```json
+{
+  "firstName": "Иван",
+  "lastName": "Иванов",
+  "termsAccepted": true,
+  "privacyAccepted": true
+}
+```
+
+Успешный ответ:
+
+```json
+{
+  "message": "Профиль успешно заполнен.",
+  "token": "eyJ...",
+  "stage": "AUTHENTICATED",
+  "user": {
+    "id": 1,
+    "firstName": "Иван",
+    "lastName": "Иванов",
+    "phone": "+996700123456"
+  }
+}
+```
+
+Полученный токен предоставляет полный доступ к приложению.
+
+### US-04 — вход по номеру телефона
+
+#### 1. Отправить OTP
+
+```http
+POST /api/v1/auth/login/send-otp
+Content-Type: application/json
+```
+
+```json
+{
+  "phone": "+996700123456",
+  "channel": "SMS"
+}
+```
+
+Успешный ответ:
+
+```json
+{
+  "message": "Код для входа успешно отправлен.",
+  "retryAfterSeconds": 60
+}
+```
+
+#### 2. Подтвердить OTP и войти
+
+```http
+POST /api/v1/auth/login/verify-otp
+Content-Type: application/json
+```
+
+```json
+{
+  "phone": "+996700123456",
+  "code": "123456"
+}
+```
+
+Успешный ответ:
+
+```json
+{
+  "accessToken": "eyJ...",
+  "tokenType": "Bearer",
+  "stage": "AUTHENTICATED",
+  "user": {
+    "id": 1,
+    "firstName": "Иван",
+    "lastName": "Иванов",
+    "phone": "+996700123456",
+    "email": "ivan@example.com"
+  }
+}
+```
+
+#### 3. Проверить сохранённую сессию
+
+```http
+GET /api/v1/users/me
+Authorization: Bearer <accessToken>
+```
+
+Успешный ответ:
+
+```json
+{
+  "id": 1,
+  "firstName": "Иван",
+  "lastName": "Иванов",
+  "phone": "+996700123456",
+  "email": "ivan@example.com"
+}
+```
+
+Мобильное приложение сохраняет токен в защищённом хранилище и вызывает `/api/v1/users/me` при запуске:
+
+- `200` — открыть главный экран без повторного OTP;
+- `401/403` — удалить токен и показать экран входа.
+
+Access token действует 24 часа.
+
+### US-05 — просмотр и редактирование профиля
+
+Все endpoint'ы US-05 требуют JWT с уровнем доступа `FULL_ACCESS`.
+
+#### 1. Получить текущий профиль
+
+```http
+GET /api/v1/users/me
+Authorization: Bearer <accessToken>
+```
+
+Успешный ответ — `200 OK`:
+
+```json
+{
+  "id": 1,
+  "firstName": "Иван",
+  "lastName": "Иванов",
+  "phone": "+996700123456",
+  "email": "ivan@example.com"
+}
+```
+
+#### 2. Обновить профиль
+
+Телефон не передаётся в теле запроса и не изменяется этим endpoint'ом.
+
+```http
+PUT /api/v1/users/me
+Authorization: Bearer <accessToken>
+Content-Type: application/json
+```
+
+```json
+{
+  "firstName": "Иван",
+  "lastName": "Петров",
+  "email": "ivan.petrov@example.com"
+}
+```
+
+Успешный ответ — `200 OK`:
+
+```json
+{
+  "id": 1,
+  "firstName": "Иван",
+  "lastName": "Петров",
+  "phone": "+996700123456",
+  "email": "ivan.petrov@example.com"
+}
+```
+
+#### 3. Отправить OTP для смены телефона
+
+Код отправляется на новый, ещё не занятый номер.
+
+```http
+POST /api/v1/users/me/phone-change/send-otp
+Authorization: Bearer <accessToken>
+Content-Type: application/json
+```
+
+```json
+{
+  "newPhone": "+996555123456",
+  "channel": "SMS"
+}
+```
+
+Успешный ответ — `200 OK`:
+
+```json
+{
+  "message": "Код отправлен на новый номер",
+  "retryAfterSeconds": 60
+}
+```
+
+Если номер уже принадлежит другому пользователю, сервер возвращает `409 Conflict`.
+
+#### 4. Подтвердить смену телефона
+
+```http
+POST /api/v1/users/me/phone-change/confirm
+Authorization: Bearer <accessToken>
+Content-Type: application/json
+```
+
+```json
+{
+  "newPhone": "+996555123456",
+  "code": "123456"
+}
+```
+
+Успешный ответ содержит новый JWT и обновлённый профиль:
+
+```json
+{
+  "accessToken": "eyJ...",
+  "tokenType": "Bearer",
+  "user": {
+    "id": 1,
+    "firstName": "Иван",
+    "lastName": "Петров",
+    "phone": "+996555123456",
+    "email": "ivan.petrov@example.com"
+  }
+}
+```
+
+После успешной смены номера клиент должен заменить сохранённый access token значением
+`accessToken` из ответа.
+
+### US-06 — Выход из учётной записи
+
+Блокирует текущий JWT-токен пользователя путем добавления его jti в черный список (Blacklist) в Redis.
+
+```http
+POST /api/v1/auth/logout
+Authorization: Bearer <accessToken>
+```
+
+Успешный ответ — `204 No content`:
 
 ## База данных
 

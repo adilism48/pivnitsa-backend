@@ -1,4 +1,4 @@
-package kg.megalab.pivnitsabackend.dto;
+package kg.megalab.pivnitsabackend.dto.otp;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

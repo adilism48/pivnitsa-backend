@@ -38,7 +38,10 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
-                                "/actuator/**"
+                                "/actuator/**",
+                                "/api/v1/auth/login/send-otp",
+                                "/api/v1/auth/login/verify-otp",
+                                "/error"
                         ).permitAll()
 
                         .requestMatchers("/api/v1/auth/complete-profile")

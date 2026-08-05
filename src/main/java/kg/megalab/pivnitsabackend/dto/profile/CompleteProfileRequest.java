@@ -1,4 +1,4 @@
-package kg.megalab.pivnitsabackend.dto;
+package kg.megalab.pivnitsabackend.dto.profile;
 
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
