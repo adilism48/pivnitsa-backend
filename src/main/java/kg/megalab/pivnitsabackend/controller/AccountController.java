@@ -15,12 +15,12 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
+@SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
 public class AccountController {
 
     private final AccountService accountService;
 
     @DeleteMapping("/me")
-    @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
     public ResponseEntity<Map<String, String>> deleteAccount(
             @AuthenticationPrincipal String phone
     ) {
