@@ -7,6 +7,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import kg.megalab.pivnitsabackend.config.OpenApiConfig;
 
 import java.util.Map;
 
@@ -18,6 +20,7 @@ public class AccountController {
     private final AccountService accountService;
 
     @DeleteMapping("/me")
+    @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
     public ResponseEntity<Map<String, String>> deleteAccount(
             @AuthenticationPrincipal String phone
     ) {
