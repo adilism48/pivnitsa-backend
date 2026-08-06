@@ -3,6 +3,7 @@ package kg.megalab.pivnitsabackend.service;
 import kg.megalab.pivnitsabackend.entity.BookingStatus;
 import kg.megalab.pivnitsabackend.entity.User;
 import kg.megalab.pivnitsabackend.exception.ActiveBookingExistsException;
+import kg.megalab.pivnitsabackend.exception.UserNotFoundException;
 import kg.megalab.pivnitsabackend.repository.BookingRepository;
 import kg.megalab.pivnitsabackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ public class AccountService {
     @Transactional
     public void deleteAccount(String phone) {
         User user = userRepository.findByPhone(phone)
-                .orElseThrow(() -> new IllegalStateException("Пользователь не найден"));
+                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
 
         boolean hasActiveBooking = bookingRepository
                 .existsActivePaidBookingByUserId(user.getId(), BookingStatus.CONFIRMED);
