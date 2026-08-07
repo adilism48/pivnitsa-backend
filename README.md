@@ -27,10 +27,16 @@
 
 ## Локальный запуск
 
-Для запуска backend и PostgreSQL необходим Docker.
+Для запуска backend и PostgreSQL, Redis, Garage необходим Docker.
 
 ```bash
 docker compose up -d --build
+```
+
+Чтобы загруженные в локальный S3 изображения были доступны по ссылке
+
+```bash
+docker exec -it garage_s3 /garage bucket website pivnitsa-media-local --allow
 ```
 
 Проверить состояние контейнеров:
@@ -396,6 +402,36 @@ Authorization: Bearer <accessToken>
 ```
 
 Успешный ответ — `204 No content`:
+
+### US-08 — Баннеры мероприятий для главного экрана
+
+Выдает лимитированный и отсортированный по дате и статусу список мероприятий для баннера главного экрана. Минимальный лимит 1 максимальный 50.
+Выводит только со статусом `PUBLISHED`
+
+```http
+GET /api/v1/events/banners?limit=2
+```
+
+Успешный ответ — `200 OK`:
+
+```json
+{
+  "eventBanners": [
+    {
+      "id": 1,
+      "title": "Event 1",
+      "bannerUrl": "IMG-URL",
+      "startsAt": "2026-08-08T20:19:23.315808Z"
+    },
+    {
+      "id": 3,
+      "title": "Event 2",
+      "bannerUrl": "IMG-URL",
+      "startsAt": "2026-08-12T20:19:23.315808Z"
+    }
+  ]
+}
+```
 
 ## База данных
 
