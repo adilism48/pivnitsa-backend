@@ -1,6 +1,8 @@
 package kg.megalab.pivnitsabackend.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
+import kg.megalab.pivnitsabackend.config.OpenApiConfig;
 import kg.megalab.pivnitsabackend.dto.event.EventBannersResponse;
 import kg.megalab.pivnitsabackend.dto.event.CreateEventRequest;
 import kg.megalab.pivnitsabackend.dto.event.EventResponse;
@@ -17,6 +19,7 @@ import java.net.URI;
 @RestController
 @RequestMapping("/api/v1/events")
 @RequiredArgsConstructor
+@SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
 public class EventController {
 
     private final EventService eventService;
