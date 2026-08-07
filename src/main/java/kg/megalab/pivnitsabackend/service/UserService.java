@@ -9,6 +9,8 @@ import kg.megalab.pivnitsabackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
+import kg.megalab.pivnitsabackend.exception.PhoneAlreadyUsedException;
 
 import java.util.Locale;
 
@@ -20,26 +22,28 @@ public class UserService {
 
     @Transactional
     public User completeProfile(String phone, CompleteProfileRequest request) {
-        return userRepository.findByPhone(phone)
-                .map(existingUser -> {
-                    existingUser.setFirstName(request.firstName());
-                    existingUser.setLastName(request.lastName());
-                    existingUser.setPhoneVerified(true);
-                    existingUser.setTermsAccepted(request.termsAccepted());
-                    existingUser.setPrivacyAccepted(request.privacyAccepted());
-                    return userRepository.save(existingUser);
-                })
-                .orElseGet(() -> {
-                    User newUser = User.builder()
-                            .phone(phone)
-                            .firstName(request.firstName())
-                            .lastName(request.lastName())
-                            .phoneVerified(true)
-                            .termsAccepted(request.termsAccepted())
-                            .privacyAccepted(request.privacyAccepted())
-                            .build();
-                    return userRepository.save(newUser);
-                });
+        if (userRepository.findByPhone(phone).isPresent()) {
+            throw new PhoneAlreadyUsedException(
+                    "Этот номер телефона уже зарегистрирован. Пожалуйста, войдите в аккаунт."
+            );
+        }
+
+        User newUser = User.builder()
+                .phone(phone)
+                .firstName(request.firstName())
+                .lastName(request.lastName())
+                .phoneVerified(true)
+                .termsAccepted(request.termsAccepted())
+                .privacyAccepted(request.privacyAccepted())
+                .build();
+
+        try {
+            return userRepository.save(newUser);
+        } catch (DataIntegrityViolationException e) {
+            throw new PhoneAlreadyUsedException(
+                    "Этот номер телефона уже зарегистрирован. Пожалуйста, войдите в аккаунт."
+            );
+        }
     }
 
     @Transactional
