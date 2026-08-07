@@ -20,6 +20,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: redis
+    restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
@@ -50,6 +51,7 @@ services:
 
   backend:
     build: .
+    image: pivnitsa-backend:latest
     container_name: pivnitsa-backend
     environment:
       DB_URL: jdbc:postgresql://postgres:5432/pivnitsa
@@ -79,7 +81,10 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     restart: unless-stopped
+
 volumes:
   postgres-data:
   redis-data:

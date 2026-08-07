@@ -1,8 +1,10 @@
 package kg.megalab.pivnitsabackend.controller;
 
+import jakarta.validation.Valid;
 import kg.megalab.pivnitsabackend.dto.event.EventBannersResponse;
-import kg.megalab.pivnitsabackend.dto.event.EventRequest;
+import kg.megalab.pivnitsabackend.dto.event.CreateEventRequest;
 import kg.megalab.pivnitsabackend.dto.event.EventResponse;
+import kg.megalab.pivnitsabackend.dto.event.UpdateEventRequest;
 import kg.megalab.pivnitsabackend.service.EventService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -28,7 +30,7 @@ public class EventController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<EventResponse> create(@ModelAttribute EventRequest request) {
+    public ResponseEntity<EventResponse> create(@Valid @ModelAttribute CreateEventRequest request) {
 
         EventResponse response = eventService.create(request);
 
@@ -39,5 +41,19 @@ public class EventController {
                 .toUri();
 
         return ResponseEntity.created(location).body(response);
+    }
+
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<EventResponse> update(@Valid @ModelAttribute UpdateEventRequest request, @PathVariable Long id) {
+
+        EventResponse response = eventService.update(id, request);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id){
+        eventService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

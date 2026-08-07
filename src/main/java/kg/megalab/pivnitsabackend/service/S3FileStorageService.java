@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
@@ -67,5 +68,23 @@ public class S3FileStorageService {
         String cleanKey = key.startsWith("/") ? key.substring(1) : key;
 
         return base + "/" + cleanKey;
+    }
+
+    public void delete(String key) {
+        if (key == null || key.isBlank()) {
+            return;
+        }
+
+        try {
+            DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .build();
+
+            s3Client.deleteObject(deleteObjectRequest);
+            log.info("Файл успешно удален из S3: {}", key);
+        } catch (Exception e) {
+            log.error("Ошибка при удалении файла {} из S3", key, e);
+        }
     }
 }
