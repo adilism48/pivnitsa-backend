@@ -18,7 +18,6 @@ public record UpdateEventRequest(
         @Size(max = 2000, message = "Описание не должно превышать 2000 символов")
         String description,
 
-        @NotBlank
         @Schema(type = "string", format = "binary", description = "Необязательный файл баннера", nullable = true)
         MultipartFile file,
 

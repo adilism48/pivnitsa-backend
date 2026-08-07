@@ -23,6 +23,10 @@ spring:
       connect-timeout: 10s
       ssl:
         enabled: ${REDIS_SSL_ENABLED:false}
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 jwt:
   secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
