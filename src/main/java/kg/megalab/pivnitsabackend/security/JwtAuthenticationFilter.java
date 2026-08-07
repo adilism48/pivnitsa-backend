@@ -19,6 +19,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
+import io.jsonwebtoken.JwtException;
 
 import java.io.IOException;
 import java.util.List;
@@ -89,6 +90,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     response,
                     null,
                     new TokenBlacklistUnavailableException("База данных токенов недоступна")
+            );
+        } catch (JwtException e) {
+            log.warn("Невалидный или повреждённый JWT токен для {}: {}", request.getRequestURI(), e.getMessage());
+            SecurityContextHolder.clearContext();
+            handlerExceptionResolver.resolveException(
+                    request,
+                    response,
+                    null,
+                    new InvalidTokenException("Невалидный или повреждённый токен")
             );
         } catch (Exception e) {
             log.error("Непредвиденная ошибка в фильтре для {}: {}", request.getRequestURI(), e.getMessage(), e);
