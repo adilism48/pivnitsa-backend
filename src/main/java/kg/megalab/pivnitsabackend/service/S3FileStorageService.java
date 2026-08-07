@@ -12,9 +12,11 @@ import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
 
@@ -123,10 +125,24 @@ public class S3FileStorageService {
     }
 
     private boolean isRealImage(MultipartFile file) {
-        try (InputStream input = file.getInputStream()) {
-            BufferedImage image = ImageIO.read(input);
-            return image != null;
-        } catch (IOException e) {
+        try (InputStream input = file.getInputStream();
+             ImageInputStream iis = ImageIO.createImageInputStream(input)) {
+
+            Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
+            if (!readers.hasNext()) {
+                return false;
+            }
+
+            ImageReader reader = readers.next();
+            try {
+                reader.setInput(iis, true, true);
+                int width = reader.getWidth(0);
+                int height = reader.getHeight(0);
+                return width > 0 && height > 0;
+            } finally {
+                reader.dispose();
+            }
+        } catch (Exception e) {
             return false;
         }
     }
