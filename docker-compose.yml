@@ -30,6 +30,24 @@ services:
       timeout: 3s
       retries: 5
 
+  garage:
+    image: dxflrs/garage:v2.3.0
+    container_name: garage_s3
+    restart: unless-stopped
+    entrypoint: [ "/garage" ]
+    command: [ "server", "--single-node", "--default-bucket" ]
+    environment:
+      - GARAGE_DEFAULT_ACCESS_KEY=GK1234567890abcdef12345678
+      - GARAGE_DEFAULT_SECRET_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      - GARAGE_DEFAULT_BUCKET=pivnitsa-media-local
+    ports:
+      - "3900:3900"
+      - "3902:3902"
+    volumes:
+      - ./garage.toml:/etc/garage.toml:ro
+      - garage-meta:/var/lib/garage/meta
+      - garage-data:/var/lib/garage/data
+
   backend:
     build: .
     container_name: pivnitsa-backend
@@ -50,6 +68,12 @@ services:
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
       REDIS_SSL_ENABLED: ${REDIS_SSL_ENABLED:-false}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME:-pivnitsa-media-local}
+      S3_REGION: ${S3_REGION:-garage}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-GK1234567890abcdef12345678}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
+      S3_ENDPOINT: ${S3_ENDPOINT:-http://garage:3900}
+      S3_PUBLIC_URL: ${S3_PUBLIC_URL:-http://pivnitsa-media-local.localhost:3902}
     ports:
       - "8080:8080"
     depends_on:
@@ -59,3 +83,5 @@ services:
 volumes:
   postgres-data:
   redis-data:
+  garage-meta:
+  garage-data:

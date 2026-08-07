@@ -47,7 +47,7 @@ public class SecurityConfig {
 
                         // GET Open for non auth user
                         .requestMatchers(
-                                HttpMethod.GET,
+                                // HttpMethod.GET,
                                 "/api/v1/events",
                                 "/api/v1/events/**"
                         ).permitAll()

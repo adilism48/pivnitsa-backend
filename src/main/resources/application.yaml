@@ -49,3 +49,11 @@ management:
   endpoint:
     health:
       show-details: when-authorized
+app:
+  s3:
+    bucket-name: ${S3_BUCKET_NAME:pivnitsa-media-local}
+    region: ${S3_REGION:garage}
+    access-key: ${S3_ACCESS_KEY:GK1234567890abcdef12345678}
+    secret-key: ${S3_SECRET_KEY:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
+    endpoint: ${S3_ENDPOINT:http://garage_s3:3900}
+    public-url: ${S3_PUBLIC_URL:http://pivnitsa-media-local.localhost:3902}
