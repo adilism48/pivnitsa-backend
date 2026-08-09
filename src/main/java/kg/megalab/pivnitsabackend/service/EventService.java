@@ -6,9 +6,11 @@ import kg.megalab.pivnitsabackend.exception.EventNotFoundException;
 import kg.megalab.pivnitsabackend.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -135,7 +137,39 @@ public class EventService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public EventPageResponse getUpcomingEvents(int page, int size) {
+
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.clamp(size, 1, 50);
+
+        Pageable pageable = PageRequest.of(safePage, safeSize);
+        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+
+        Page<Event> result =
+                eventRepository.findUpcomingPublishedEventsPage(now, pageable);
+
+        List<EventListItemResponse> items = result.getContent()
+                .stream()
+                .map(event -> new EventListItemResponse(
+                        event.getId(),
+                        event.getTitle(),
+                        s3FileStorageService.toFullUrl(event.getBannerUrl()),
+                        event.getStartsAt()
+                ))
+                .toList();
+
+        return new EventPageResponse(
+                items,
+                result.getNumber(),
+                result.getSize(),
+                result.hasNext()
+        );
+    }
+
     private Event getEvent(Long id) {
         return eventRepository.findById(id).orElseThrow(() -> new EventNotFoundException("Event not found, id: " + id));
     }
+
+
 }

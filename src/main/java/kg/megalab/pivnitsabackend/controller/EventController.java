@@ -3,10 +3,7 @@ package kg.megalab.pivnitsabackend.controller;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import kg.megalab.pivnitsabackend.config.OpenApiConfig;
-import kg.megalab.pivnitsabackend.dto.event.EventBannersResponse;
-import kg.megalab.pivnitsabackend.dto.event.CreateEventRequest;
-import kg.megalab.pivnitsabackend.dto.event.EventResponse;
-import kg.megalab.pivnitsabackend.dto.event.UpdateEventRequest;
+import kg.megalab.pivnitsabackend.dto.event.*;
 import kg.megalab.pivnitsabackend.service.EventService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -23,6 +20,16 @@ import java.net.URI;
 public class EventController {
 
     private final EventService eventService;
+
+    @GetMapping
+    public ResponseEntity<EventPageResponse> getUpcomingEvents(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(
+                eventService.getUpcomingEvents(page, size)
+        );
+    }
 
     @GetMapping("/banners")
     public ResponseEntity<EventBannersResponse> getEventBanners(@RequestParam(defaultValue = "3") int limit){
