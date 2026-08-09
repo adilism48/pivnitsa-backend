@@ -1,6 +1,9 @@
 package kg.megalab.pivnitsabackend.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import kg.megalab.pivnitsabackend.exception.otpexceptions.InvalidOtpException;
+import kg.megalab.pivnitsabackend.exception.otpexceptions.OtpAlreadySentException;
+import kg.megalab.pivnitsabackend.exception.otpexceptions.OtpExpiredException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
