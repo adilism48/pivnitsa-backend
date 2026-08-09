@@ -5,7 +5,6 @@ import kg.megalab.pivnitsabackend.entity.Event;
 import kg.megalab.pivnitsabackend.exception.EventNotFoundException;
 import kg.megalab.pivnitsabackend.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
