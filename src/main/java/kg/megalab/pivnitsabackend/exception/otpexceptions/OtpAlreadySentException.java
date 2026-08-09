@@ -1,4 +1,4 @@
-package kg.megalab.pivnitsabackend.exception;
+package kg.megalab.pivnitsabackend.exception.otpexceptions;
 
 public class OtpAlreadySentException extends RuntimeException {
 
