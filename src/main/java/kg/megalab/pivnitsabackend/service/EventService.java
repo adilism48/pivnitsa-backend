@@ -2,6 +2,7 @@ package kg.megalab.pivnitsabackend.service;
 
 import kg.megalab.pivnitsabackend.dto.event.*;
 import kg.megalab.pivnitsabackend.entity.Event;
+import kg.megalab.pivnitsabackend.entity.EventStatus;
 import kg.megalab.pivnitsabackend.exception.EventNotFoundException;
 import kg.megalab.pivnitsabackend.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
@@ -163,6 +164,26 @@ public class EventService {
                 result.getNumber(),
                 result.getSize(),
                 result.hasNext()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public EventResponse getEventById(Long id) {
+
+        Event event = eventRepository.findById(id)
+                .filter(e -> e.getStatus() == EventStatus.PUBLISHED)
+                .orElseThrow(() -> new EventNotFoundException("Event not found, id: " + id));
+
+        return new EventResponse(
+                event.getId(),
+                event.getTitle(),
+                event.getDescription(),
+                s3FileStorageService.toFullUrl(event.getBannerUrl()),
+                event.getStatus(),
+                event.getStartsAt(),
+                event.getEndsAt(),
+                event.getCreatedAt(),
+                event.getUpdatedAt()
         );
     }
 

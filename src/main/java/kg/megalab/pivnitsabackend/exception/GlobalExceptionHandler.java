@@ -10,6 +10,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.time.OffsetDateTime;
@@ -71,6 +72,39 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.NOT_FOUND)
                 .body(response);
     }
+
+    @ExceptionHandler(EventNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleEventNotFound(
+            EventNotFoundException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponse response = new ErrorResponse(
+                OffsetDateTime.now(ZoneOffset.UTC),
+                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(response);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(
+            MethodArgumentTypeMismatchException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponse response = new ErrorResponse(
+                OffsetDateTime.now(ZoneOffset.UTC),
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                "Некорректный формат параметра: " + ex.getName(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
 
     @ExceptionHandler(PhoneAlreadyUsedException.class)
     public ResponseEntity<ErrorResponse> handlePhoneAlreadyUsed(
@@ -155,21 +189,6 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
-    }
-
-    @ExceptionHandler(EventNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleEventNotFound(EventNotFoundException ex, HttpServletRequest request) {
-
-        ErrorResponse errorResponse = new ErrorResponse(
-                OffsetDateTime.now(ZoneOffset.UTC),
-                HttpStatus.NOT_FOUND.value(),
-                HttpStatus.NOT_FOUND.getReasonPhrase(),
-                ex.getMessage(),
-                request.getRequestURI()
-        );
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(errorResponse);
     }
 
     @ExceptionHandler(InvalidFileException.class)

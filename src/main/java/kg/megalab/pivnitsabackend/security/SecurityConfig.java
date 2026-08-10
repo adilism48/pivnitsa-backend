@@ -32,7 +32,6 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        // Шаг 4-6 флоу: гость без токена вообще — отправка и проверка OTP.
                         .requestMatchers(
                                 "/api/v1/auth/send-otp",
                                 "/api/v1/auth/verify-otp",
