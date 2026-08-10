@@ -1,5 +1,7 @@
 package kg.megalab.pivnitsabackend.dto.event;
 
+import kg.megalab.pivnitsabackend.entity.EventStatus;
+
 import java.time.OffsetDateTime;
 
 public record EventResponse(
@@ -7,7 +9,10 @@ public record EventResponse(
         String title,
         String description,
         String bannerUrl,
+        EventStatus event,
         OffsetDateTime startsAt,
-        OffsetDateTime endsAt
+        OffsetDateTime endsAt,
+        OffsetDateTime createdAt,
+        OffsetDateTime updatedAt
 ) {
 }

@@ -3,6 +3,7 @@ package kg.megalab.pivnitsabackend.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -12,7 +13,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.http.HttpMethod;
 
 import java.util.List;
 
@@ -43,7 +43,14 @@ public class SecurityConfig {
                                 "/api/v1/auth/login/verify-otp",
                                 "/error"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/events/**").permitAll()
+
+                        // GET Open for non auth user
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/v1/events",
+                                "/api/v1/events/**"
+                        ).permitAll()
+
                         .requestMatchers("/api/v1/auth/complete-profile")
                         .hasAnyRole("PRE_AUTH", "FULL_ACCESS")
                         .anyRequest().hasRole("FULL_ACCESS")

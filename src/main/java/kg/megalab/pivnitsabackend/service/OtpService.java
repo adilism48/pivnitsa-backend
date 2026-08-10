@@ -2,14 +2,13 @@ package kg.megalab.pivnitsabackend.service;
 
 import kg.megalab.pivnitsabackend.entity.NotificationChannel;
 import kg.megalab.pivnitsabackend.entity.OtpCode;
-import kg.megalab.pivnitsabackend.exception.InvalidOtpException;
-import kg.megalab.pivnitsabackend.exception.OtpAlreadySentException;
-import kg.megalab.pivnitsabackend.exception.OtpExpiredException;
+import kg.megalab.pivnitsabackend.exception.otpexceptions.InvalidOtpException;
+import kg.megalab.pivnitsabackend.exception.otpexceptions.OtpAlreadySentException;
+import kg.megalab.pivnitsabackend.exception.otpexceptions.OtpExpiredException;
 import kg.megalab.pivnitsabackend.exception.TooManyAttemptsException;
 import kg.megalab.pivnitsabackend.otp.OtpDispatcherService;
 import kg.megalab.pivnitsabackend.otp.OtpPurpose;
 import kg.megalab.pivnitsabackend.repository.OtpCodeRepository;
-import kg.megalab.pivnitsabackend.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
