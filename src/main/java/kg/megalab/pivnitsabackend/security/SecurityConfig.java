@@ -12,6 +12,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.http.HttpMethod;
 
 import java.util.List;
 
@@ -31,7 +32,6 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        // Шаг 4-6 флоу: гость без токена вообще — отправка и проверка OTP.
                         .requestMatchers(
                                 "/api/v1/auth/send-otp",
                                 "/api/v1/auth/verify-otp",
@@ -43,7 +43,7 @@ public class SecurityConfig {
                                 "/api/v1/auth/login/verify-otp",
                                 "/error"
                         ).permitAll()
-
+                        .requestMatchers(HttpMethod.GET, "/api/v1/events/**").permitAll()
                         .requestMatchers("/api/v1/auth/complete-profile")
                         .hasAnyRole("PRE_AUTH", "FULL_ACCESS")
                         .anyRequest().hasRole("FULL_ACCESS")
