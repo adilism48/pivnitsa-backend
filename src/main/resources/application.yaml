@@ -61,3 +61,7 @@ app:
     secret-key: ${S3_SECRET_KEY:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
     endpoint: ${S3_ENDPOINT:http://garage_s3:3900}
     public-url: ${S3_PUBLIC_URL:http://pivnitsa-media-local.localhost:3902}
+  mobile:
+    deep-link-prefix: "https://youtu.be/dQw4w9WgXcQ?si=kXZ24hyDJ2J2xN4F"
+    ios-store: "https://apps.apple.com/app/id123456789"
+    android-store: "https://play.google.com/store/apps/details?id=com.yourbar.app"

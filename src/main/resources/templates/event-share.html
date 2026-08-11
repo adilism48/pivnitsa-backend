@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} + ' — Bar App'">Мероприятие — Pivnitsa</title>
+
+    <!-- Open Graph for preview in messages -->
+    <meta property="og:title" th:content="${title}" />
+    <meta property="og:description" th:content="${description}" />
+    <meta property="og:image" th:content="${imageUrl}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Pivnitsa" />
+
+    <style>
+        :root {
+            --bg: #000000;
+            --card-bg: #141414;
+            --accent: #a68c5b;
+            --accent-hover: #b89d6a;
+            --text-main: #ffffff;
+            --text-muted: #999999;
+            --border: #242424;
+            --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font),serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .image-container {
+            width: 100%;
+            height: 220px;
+            background-color: #1f1f1f;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .content {
+            padding: 28px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 20px;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+
+        p {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 28px;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background-color: var(--accent);
+            color: #000000;
+            text-align: center;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 17px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s, opacity 0.2s;
+        }
+
+        .btn:active {
+            opacity: 0.8;
+        }
+
+        .footer-note {
+            margin-top: 18px;
+            font-size: 12px;
+            color: #555555;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="image-container" th:if="${imageUrl != null and !imageUrl.isEmpty()}">
+        <img th:src="${imageUrl}" th:alt="${title}">
+    </div>
+
+    <div class="content">
+        <span class="badge">Мероприятие</span>
+        <h1 th:text="${title}">Название события</h1>
+        <p th:text="${description}">Описание события...</p>
+
+        <a th:href="${deepLink}" onclick="handleOpenApp(event)" class="btn">
+            Открыть в приложении
+        </a>
+
+        <div class="footer-note">Ссылка откроет приложение или магазин</div>
+    </div>
+</div>
+
+<!-- JS редиректа по нажатию -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const CONFIG = {
+        deepLink: /*[[${deepLink}]]*/ 'org.example.app://events/1',
+        iosStore: /*[[${iosStore}]]*/ 'https://apps.apple.com/app/id123456789',
+        androidStore: /*[[${androidStore}]]*/ 'https://play.google.com/store/apps/details?id=com.piv.app'
+    };
+
+    function getMobileOS() {
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        if (/android/i.test(userAgent)) return 'Android';
+        if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) return 'iOS';
+        return 'desktop';
+    }
+
+    function handleOpenApp(event) {
+        if (event) event.preventDefault();
+
+        const os = getMobileOS();
+        if (os === 'desktop') {
+            alert('Пожалуйста, откройте ссылку с мобильного устройства');
+            return;
+        }
+
+        const storeUrl = (os === 'iOS') ? CONFIG.iosStore : CONFIG.androidStore;
+        let appOpened = false;
+
+        const preventStoreRedirect = () => {
+            appOpened = true;
+            window.removeEventListener('pagehide', preventStoreRedirect);
+            window.removeEventListener('blur', preventStoreRedirect);
+        };
+
+        window.addEventListener('pagehide', preventStoreRedirect);
+        window.addEventListener('blur', preventStoreRedirect);
+
+        // 1. Попытка вызвать приложение
+        window.location.href = CONFIG.deepLink;
+
+        // 2. Переход на PlayAppStore если страница всё ещё активна
+        setTimeout(function() {
+            if (!appOpened && document.hasFocus()) {
+                window.location.href = storeUrl;
+            }
+        }, 2500);
+    }
+    /*]]>*/
+</script>
+</body>
+</html>
