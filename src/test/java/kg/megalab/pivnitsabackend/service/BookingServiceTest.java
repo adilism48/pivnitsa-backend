@@ -1,13 +1,10 @@
 package kg.megalab.pivnitsabackend.service;
 
 import kg.megalab.pivnitsabackend.dto.booking.BookingResponse;
-import kg.megalab.pivnitsabackend.entity.Booking;
 import kg.megalab.pivnitsabackend.entity.BookingStatus;
-import kg.megalab.pivnitsabackend.entity.ClubTable;
 import kg.megalab.pivnitsabackend.entity.User;
 import kg.megalab.pivnitsabackend.exception.UserNotFoundException;
 import kg.megalab.pivnitsabackend.repository.BookingRepository;
-import kg.megalab.pivnitsabackend.repository.ClubTableRepository;
 import kg.megalab.pivnitsabackend.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,17 +32,13 @@ class BookingServiceTest {
     @Mock
     private BookingRepository bookingRepository;
 
-    @Mock
-    private ClubTableRepository clubTableRepository;
-
     private BookingService bookingService;
 
     @BeforeEach
     void setUp() {
         bookingService = new BookingService(
                 userRepository,
-                bookingRepository,
-                clubTableRepository
+                bookingRepository
         );
     }
 
@@ -57,21 +50,18 @@ class BookingServiceTest {
                 .phone("+77001234567")
                 .build();
 
-        ClubTable table = ClubTable.builder()
-                .id(10L)
-                .tableNumber("A-5")
-                .capacity(4)
-                .build();
+        OffsetDateTime bookingAt =
+                OffsetDateTime.now(ZoneId.of("Asia/Bishkek"))
+                        .plusDays(1);
 
-        Booking booking = Booking.builder()
-                .id(100L)
-                .userId(1L)
-                .clubTableId(10L)
-                .guestsCount(3)
-                .bookingAt(OffsetDateTime.now(ZoneId.of("Asia/Bishkek")).plusDays(1))
-                .amount(new BigDecimal("15000.00"))
-                .status(BookingStatus.CONFIRMED)
-                .build();
+        BookingResponse bookingResponse = new BookingResponse(
+                100L,
+                "A-5",
+                3,
+                bookingAt,
+                new BigDecimal("15000.00"),
+                BookingStatus.CONFIRMED
+        );
 
         when(userRepository.findByPhone("+77001234567"))
                 .thenReturn(Optional.of(user));
@@ -80,10 +70,7 @@ class BookingServiceTest {
                 eq(1L),
                 anyCollection(),
                 any(OffsetDateTime.class)
-        )).thenReturn(List.of(booking));
-
-        when(clubTableRepository.findById(10L))
-                .thenReturn(Optional.of(table));
+        )).thenReturn(List.of(bookingResponse));
 
         List<BookingResponse> result =
                 bookingService.getActiveBookings("+77001234567");
@@ -95,8 +82,8 @@ class BookingServiceTest {
         assertEquals(100L, response.id());
         assertEquals("A-5", response.tableNumber());
         assertEquals(3, response.guestsCount());
-        assertEquals(booking.getBookingAt(), response.bookingAt());
         assertEquals(new BigDecimal("15000.00"), response.amount());
+        assertEquals(bookingAt, response.bookingAt());
         assertEquals(BookingStatus.CONFIRMED, response.status());
     }
 
@@ -124,7 +111,6 @@ class BookingServiceTest {
         // assert
         assertTrue(result.isEmpty());
 
-        verifyNoInteractions(clubTableRepository);
     }
 
     @Test
@@ -144,8 +130,7 @@ class BookingServiceTest {
         assertEquals("Пользователь не найден", exception.getMessage());
 
         verifyNoInteractions(
-                bookingRepository,
-                clubTableRepository
+                bookingRepository
         );
     }
 }

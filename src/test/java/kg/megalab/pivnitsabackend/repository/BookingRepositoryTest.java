@@ -1,5 +1,6 @@
 package kg.megalab.pivnitsabackend.repository;
 
+import kg.megalab.pivnitsabackend.dto.booking.BookingResponse;
 import kg.megalab.pivnitsabackend.entity.Booking;
 import kg.megalab.pivnitsabackend.entity.BookingStatus;
 import kg.megalab.pivnitsabackend.entity.ClubTable;
@@ -96,7 +97,7 @@ class BookingRepositoryTest {
                 )
         );
 
-        List<Booking> result = bookingRepository.findActiveBookings(
+        List<BookingResponse> result = bookingRepository.findActiveBookings(
                 user.getId(),
                 List.of(
                         BookingStatus.PENDING_PAYMENT,
@@ -106,8 +107,8 @@ class BookingRepositoryTest {
         );
 
         assertEquals(2, result.size());
-        assertEquals(nearestBooking.getId(), result.get(0).getId());
-        assertEquals(laterBooking.getId(), result.get(1).getId());
+        assertEquals(nearestBooking.getId(), result.get(0).id());
+        assertEquals(laterBooking.getId(), result.get(1).id());
     }
 
     private Booking createBooking(
