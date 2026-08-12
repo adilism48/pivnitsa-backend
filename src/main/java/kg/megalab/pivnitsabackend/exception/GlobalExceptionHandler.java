@@ -19,6 +19,19 @@ import java.time.ZoneOffset;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(InvalidStaffCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidStaffCredentials(InvalidStaffCredentialsException ex, HttpServletRequest request) {
+        ErrorResponse response = new ErrorResponse(
+                OffsetDateTime.now(ZoneOffset.UTC),
+                HttpStatus.UNAUTHORIZED.value(),
+                HttpStatus.UNAUTHORIZED.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
     @ExceptionHandler(OtpAlreadySentException.class)
     public ResponseEntity<ErrorResponse> handleOtpAlreadySent(OtpAlreadySentException ex, HttpServletRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(

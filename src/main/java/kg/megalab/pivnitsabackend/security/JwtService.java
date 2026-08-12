@@ -17,6 +17,8 @@ public class JwtService {
     public static final String SCOPE_CLAIM = "scope";
     public static final String SCOPE_PRE_AUTH = "PRE_AUTH";
     public static final String SCOPE_FULL_ACCESS = "FULL_ACCESS";
+    public static final String SCOPE_STAFF_ACCESS = "STAFF_ACCESS";
+    private static final long STAFF_ACCESS_TTL_MILLIS = 10 * 60 * 60 * 1000;
     private static final long PRE_AUTH_TTL_MILLIS = 10 * 60 * 1000;
 
     @Value("${jwt.secret}")
@@ -24,6 +26,10 @@ public class JwtService {
 
     @Value("${jwt.expiration}")
     private long jwtExpiration;
+
+    public String generateStaffAccessToken(String email) {
+        return buildToken(email, SCOPE_STAFF_ACCESS, STAFF_ACCESS_TTL_MILLIS);
+    }
 
     public String generatePreAuthToken(String phone) {
         return buildToken(phone, SCOPE_PRE_AUTH, PRE_AUTH_TTL_MILLIS);
@@ -41,7 +47,7 @@ public class JwtService {
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + ttlMillis))
                 .signWith(getSigningKey())
-                .compact();
+                .compact();  // Base64
     }
 
     public String extractPhone(String token) {
