@@ -1,0 +1,127 @@
+package kg.megalab.pivnitsabackend.repository;
+
+import kg.megalab.pivnitsabackend.entity.Booking;
+import kg.megalab.pivnitsabackend.entity.BookingStatus;
+import kg.megalab.pivnitsabackend.entity.ClubTable;
+import kg.megalab.pivnitsabackend.entity.User;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.postgresql.PostgreSQLContainer;
+
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+@DataJpaTest
+@Testcontainers
+@AutoConfigureTestDatabase(
+        replace = AutoConfigureTestDatabase.Replace.NONE
+)
+class BookingRepositoryTest {
+
+    @Autowired
+    private BookingRepository bookingRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ClubTableRepository clubTableRepository;
+
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer postgres =
+            new PostgreSQLContainer("postgres:17-alpine");
+
+    @Test
+    void shouldReturnOnlyActiveBookingsSortedByNearestFirst() {
+        OffsetDateTime now =
+                OffsetDateTime.now(ZoneId.of("Asia/Bishkek"));
+
+        User user = userRepository.save(
+                User.builder()
+                        .firstName("Test")
+                        .lastName("User")
+                        .phone("+996700123456")
+                        .phoneVerified(true)
+                        .build()
+        );
+
+        ClubTable table = clubTableRepository.save(
+                ClubTable.builder()
+                        .tableNumber("A-5")
+                        .capacity(4)
+                        .active(true)
+                        .build()
+        );
+
+        Booking laterBooking = createBooking(
+                user.getId(),
+                table.getId(),
+                now.plusDays(2)
+        );
+
+        Booking nearestBooking = createBooking(
+                user.getId(),
+                table.getId(),
+                now.plusDays(1)
+        );
+
+        Booking pastBooking = createBooking(
+                user.getId(),
+                table.getId(),
+                now.minusDays(1)
+        );
+
+        Booking cancelledBooking = createBooking(
+                user.getId(),
+                table.getId(),
+                now.plusDays(3)
+        );
+        cancelledBooking.setStatus(BookingStatus.CANCELLED);
+
+        bookingRepository.saveAll(
+                List.of(laterBooking,
+                        nearestBooking,
+                        pastBooking,
+                        cancelledBooking
+                )
+        );
+
+        List<Booking> result = bookingRepository.findActiveBookings(
+                user.getId(),
+                List.of(
+                        BookingStatus.PENDING_PAYMENT,
+                        BookingStatus.CONFIRMED
+                ),
+                now
+        );
+
+        assertEquals(2, result.size());
+        assertEquals(nearestBooking.getId(), result.get(0).getId());
+        assertEquals(laterBooking.getId(), result.get(1).getId());
+    }
+
+    private Booking createBooking(
+            Long userId,
+            Long tableId,
+            OffsetDateTime bookingAt
+    ) {
+        return Booking.builder()
+                .userId(userId)
+                .clubTableId(tableId)
+                .guestsCount(2)
+                .bookingAt(bookingAt)
+                .status(BookingStatus.CONFIRMED)
+                .amount(new BigDecimal("1000.00"))
+                .build();
+    }
+}

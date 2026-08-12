@@ -19,6 +19,9 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "guests_count", nullable = false)
+    private Integer guestsCount;
+
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
