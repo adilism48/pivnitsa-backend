@@ -6,6 +6,7 @@
     <title th:text="${title} + ' — Bar App'">Мероприятие — Pivnitsa</title>
 
     <!-- Open Graph for preview in messages -->
+    <meta property="og:url" th:content="${canonicalUrl}" />
     <meta property="og:title" th:content="${title}" />
     <meta property="og:description" th:content="${description}" />
     <meta property="og:image" th:content="${imageUrl}" />
@@ -31,7 +32,7 @@
         }
 
         body {
-            font-family: var(--font),serif;
+            font-family: var(--font);
             background-color: var(--bg);
             color: var(--text-main);
             display: flex;
@@ -117,6 +118,13 @@
             transition: background-color 0.2s, opacity 0.2s;
         }
 
+        .btn-secondary {
+            margin-top: 12px;
+            background-color: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+
         .btn:active {
             opacity: 0.8;
         }
@@ -138,63 +146,14 @@
         <span class="badge">Мероприятие</span>
         <h1 th:text="${title}">Название события</h1>
         <p th:text="${description}">Описание события...</p>
-
-        <a th:href="${deepLink}" onclick="handleOpenApp(event)" class="btn">
-            Открыть в приложении
+        <a th:href="${deepLink}" class="btn">
+            Посмотреть в приложении
         </a>
-
-        <div class="footer-note">Ссылка откроет приложение или магазин</div>
+        <a th:href="${storeUrl}" class="btn btn-secondary">
+            Скачать
+        </a>
+        <div class="footer-note" th:text="${eventFound} ? 'Ссылка откроет приложение или магазин' : 'Скачайте приложение, чтобы находить мероприятия'"></div>
     </div>
 </div>
-
-<!-- JS редиректа по нажатию -->
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    const CONFIG = {
-        deepLink: /*[[${deepLink}]]*/ 'org.example.app://events/1',
-        iosStore: /*[[${iosStore}]]*/ 'https://apps.apple.com/app/id123456789',
-        androidStore: /*[[${androidStore}]]*/ 'https://play.google.com/store/apps/details?id=com.piv.app'
-    };
-
-    function getMobileOS() {
-        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-        if (/android/i.test(userAgent)) return 'Android';
-        if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) return 'iOS';
-        return 'desktop';
-    }
-
-    function handleOpenApp(event) {
-        if (event) event.preventDefault();
-
-        const os = getMobileOS();
-        if (os === 'desktop') {
-            alert('Пожалуйста, откройте ссылку с мобильного устройства');
-            return;
-        }
-
-        const storeUrl = (os === 'iOS') ? CONFIG.iosStore : CONFIG.androidStore;
-        let appOpened = false;
-
-        const preventStoreRedirect = () => {
-            appOpened = true;
-            window.removeEventListener('pagehide', preventStoreRedirect);
-            window.removeEventListener('blur', preventStoreRedirect);
-        };
-
-        window.addEventListener('pagehide', preventStoreRedirect);
-        window.addEventListener('blur', preventStoreRedirect);
-
-        // 1. Попытка вызвать приложение
-        window.location.href = CONFIG.deepLink;
-
-        // 2. Переход на PlayAppStore если страница всё ещё активна
-        setTimeout(function() {
-            if (!appOpened && document.hasFocus()) {
-                window.location.href = storeUrl;
-            }
-        }, 2500);
-    }
-    /*]]>*/
-</script>
 </body>
 </html>

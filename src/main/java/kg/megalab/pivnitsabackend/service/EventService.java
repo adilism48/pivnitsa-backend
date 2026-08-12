@@ -6,6 +6,7 @@ import kg.megalab.pivnitsabackend.entity.EventStatus;
 import kg.megalab.pivnitsabackend.exception.EventNotFoundException;
 import kg.megalab.pivnitsabackend.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +20,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class EventService {
+
+    @Value("${app.mobile.canonicalUrl}")
+    private String canonicalUrl;
 
     private final EventRepository eventRepository;
     private final S3FileStorageService s3FileStorageService;
@@ -67,6 +71,7 @@ public class EventService {
                     event.getDescription(),
                     s3FileStorageService.toFullUrl(bannerUrl),
                     event.getStatus(),
+                    canonicalUrl + event.getId(),
                     event.getStartsAt(),
                     event.getEndsAt(),
                     event.getCreatedAt(),
@@ -111,6 +116,7 @@ public class EventService {
                     event.getDescription(),
                     s3FileStorageService.toFullUrl(event.getBannerUrl()),
                     event.getStatus(),
+                    canonicalUrl + event.getId(),
                     event.getStartsAt(),
                     event.getEndsAt(),
                     event.getCreatedAt(),
@@ -180,6 +186,7 @@ public class EventService {
                 event.getDescription(),
                 s3FileStorageService.toFullUrl(event.getBannerUrl()),
                 event.getStatus(),
+                canonicalUrl + event.getId(),
                 event.getStartsAt(),
                 event.getEndsAt(),
                 event.getCreatedAt(),
