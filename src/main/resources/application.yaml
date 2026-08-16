@@ -61,3 +61,7 @@ app:
     secret-key: ${S3_SECRET_KEY:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
     endpoint: ${S3_ENDPOINT:http://garage_s3:3900}
     public-url: ${S3_PUBLIC_URL:http://pivnitsa-media-local.localhost:3902}
+  initial-owner:
+    email: ${INITIAL_OWNER_EMAIL}
+    password: ${INITIAL_OWNER_PASSWORD}
+    full-name: ${INITIAL_OWNER_FULL_NAME:Владелец}

@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import kg.megalab.pivnitsabackend.exception.otpexceptions.InvalidOtpException;
 import kg.megalab.pivnitsabackend.exception.otpexceptions.OtpAlreadySentException;
 import kg.megalab.pivnitsabackend.exception.otpexceptions.OtpExpiredException;
+import kg.megalab.pivnitsabackend.exception.staffexception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -30,6 +31,66 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    @ExceptionHandler(StaffEmailAlreadyExistException.class)
+    public ResponseEntity<ErrorResponse> handleStaffEmailAlreadyExist(StaffEmailAlreadyExistException ex, HttpServletRequest request) {
+        ErrorResponse response = new ErrorResponse(
+                OffsetDateTime.now(ZoneOffset.UTC),
+                HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(LastOwnerException.class)
+    public ResponseEntity<ErrorResponse> handleLastOwner(LastOwnerException ex, HttpServletRequest request) {
+        ErrorResponse response = new ErrorResponse(
+                OffsetDateTime.now(ZoneOffset.UTC),
+                HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(InsufficientStaffPermissionException.class)
+    public ResponseEntity<ErrorResponse> handleInsufficientPermission(InsufficientStaffPermissionException ex, HttpServletRequest request) {
+        ErrorResponse response = new ErrorResponse(
+                OffsetDateTime.now(ZoneOffset.UTC),
+                HttpStatus.FORBIDDEN.value(),
+                HttpStatus.FORBIDDEN.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    @ExceptionHandler(StaffNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleStaffNotFound(StaffNotFoundException ex, HttpServletRequest request) {
+        ErrorResponse response = new ErrorResponse(
+                OffsetDateTime.now(ZoneOffset.UTC),
+                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(InvalidStaffRoleException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidStaffRole(InvalidStaffRoleException ex, HttpServletRequest request) {
+        ErrorResponse response = new ErrorResponse(
+                OffsetDateTime.now(ZoneOffset.UTC),
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
     @ExceptionHandler(OtpAlreadySentException.class)

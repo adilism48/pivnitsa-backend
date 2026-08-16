@@ -53,6 +53,9 @@ public class SecurityConfig {
                         ).permitAll()
 
                         // GET Open for non auth user
+                        .requestMatchers(HttpMethod.POST, "/api/v1/staff/manage").hasRole("OWNER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/staff/manage/{id}/financial-access").hasRole("OWNER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/staff/manage/{id}/deactivate").hasAnyRole("STAFF", "OWNER")
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/v1/events",
