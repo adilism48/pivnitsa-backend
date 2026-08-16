@@ -11,7 +11,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U pivnitsa -d pivnitsa"]
+      test: [ "CMD-SHELL", "pg_isready -U pivnitsa -d pivnitsa" ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -76,6 +76,9 @@ services:
       S3_SECRET_KEY: ${S3_SECRET_KEY:-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
       S3_ENDPOINT: ${S3_ENDPOINT:-http://garage:3900}
       S3_PUBLIC_URL: ${S3_PUBLIC_URL:-http://pivnitsa-media-local.localhost:3902}
+      INITIAL_OWNER_EMAIL: ${INITIAL_OWNER_EMAIL:-owner@pivnitsa.local}
+      INITIAL_OWNER_PASSWORD: ${INITIAL_OWNER_PASSWORD:-ChangeMe123}
+      INITIAL_OWNER_FULL_NAME: ${INITIAL_OWNER_FULL_NAME:-Владелец}
     ports:
       - "8080:8080"
     depends_on:
