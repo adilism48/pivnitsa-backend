@@ -7,7 +7,9 @@ services:
       POSTGRES_USER: pivnitsa
       POSTGRES_PASSWORD: pivnitsa
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5432:5432"
+    networks:
+      - app-network
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -22,7 +24,9 @@ services:
     container_name: redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
+    networks:
+      - app-network
     volumes:
       - redis-data:/data
     healthcheck:
@@ -38,16 +42,44 @@ services:
     entrypoint: [ "/garage" ]
     command: [ "server", "--single-node", "--default-bucket" ]
     environment:
-      - GARAGE_DEFAULT_ACCESS_KEY=GK1234567890abcdef12345678
-      - GARAGE_DEFAULT_SECRET_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
-      - GARAGE_DEFAULT_BUCKET=pivnitsa-media-local
+      - GARAGE_DEFAULT_ACCESS_KEY=${S3_ACCESS_KEY:-GK1234567890abcdef12345678}
+      - GARAGE_DEFAULT_SECRET_KEY=${S3_SECRET_KEY:-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
+      - GARAGE_DEFAULT_BUCKET=${S3_BUCKET_NAME:-pivnitsa-media-local}
+      - GARAGE_RPC_SECRET=${GARAGE_RPC_SECRET:-1799bccfd7411eddcf9ebd316bc1f5287ad12a68094e1c6ac6abde7e6feae1ec}
+      - GARAGE_ADMIN_ADMIN_TOKEN=${GARAGE_ADMIN_TOKEN:-admin-secret-token}
+      - GARAGE_S3_API_ROOT_DOMAIN=${GARAGE_ROOT_DOMAIN:-localhost}
     ports:
-      - "3900:3900"
-      - "3902:3902"
+      - "127.0.0.1:3900:3900"
+      - "127.0.0.1:3902:3902"
+    networks:
+      - app-network
     volumes:
       - ./garage.toml:/etc/garage.toml:ro
       - garage-meta:/var/lib/garage/meta
       - garage-data:/var/lib/garage/data
+    healthcheck:
+      test: [ "CMD", "/garage", "status" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN}
+      MEDIA_DOMAIN: ${MEDIA_DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    networks:
+      - app-network
+    volumes:
+      - ./Caddyfile:/etc/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
 
   backend:
     build: .
@@ -80,16 +112,26 @@ services:
       INITIAL_OWNER_PASSWORD: ${INITIAL_OWNER_PASSWORD:-ChangeMe123}
       INITIAL_OWNER_FULL_NAME: ${INITIAL_OWNER_FULL_NAME:-Владелец}
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
+    networks:
+      - app-network
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+      garage:
+        condition: service_healthy
     restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   postgres-data:
   redis-data:
   garage-meta:
   garage-data:
+  caddy-data:
+  caddy-config:
