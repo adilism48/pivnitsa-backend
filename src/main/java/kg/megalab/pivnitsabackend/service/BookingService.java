@@ -35,4 +35,22 @@ public class BookingService {
                 OffsetDateTime.now()
         );
     }
+
+    @Transactional(readOnly = true)
+    public List<BookingResponse> getBookingHistory(String phone) {
+
+        User user = userRepository.findByPhone(phone)
+                .orElseThrow(() ->
+                        new UserNotFoundException("Пользователь не найден")
+                );
+
+        return bookingRepository.findBookingHistory(
+                user.getId(),
+                List.of(
+                        BookingStatus.COMPLETED,
+                        BookingStatus.CANCELLED
+                ),
+                OffsetDateTime.now()
+        );
+    }
 }

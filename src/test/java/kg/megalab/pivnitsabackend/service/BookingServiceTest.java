@@ -20,6 +20,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -111,6 +112,51 @@ class BookingServiceTest {
         // assert
         assertTrue(result.isEmpty());
 
+    }
+
+    @Test
+    void shouldReturnBookingHistoryForCurrentUser() {
+        User user = User.builder()
+                .id(1L)
+                .phone("+77001234567")
+                .build();
+
+        OffsetDateTime bookingAt =
+                OffsetDateTime.now(ZoneId.of("Asia/Bishkek"))
+                        .minusDays(1);
+
+        BookingResponse bookingResponse = new BookingResponse(
+                101L,
+                "B-2",
+                4,
+                bookingAt,
+                new BigDecimal("18000.00"),
+                BookingStatus.COMPLETED
+        );
+
+        when(userRepository.findByPhone("+77001234567"))
+                .thenReturn(Optional.of(user));
+
+        when(bookingRepository.findBookingHistory(
+                eq(1L),
+                anyCollection(),
+                any(OffsetDateTime.class)
+        )).thenReturn(List.of(bookingResponse));
+
+        List<BookingResponse> result =
+                bookingService.getBookingHistory("+77001234567");
+
+        assertEquals(1, result.size());
+        assertEquals(bookingResponse, result.getFirst());
+
+        verify(bookingRepository).findBookingHistory(
+                eq(1L),
+                argThat(statuses -> statuses.equals(List.of(
+                        BookingStatus.COMPLETED,
+                        BookingStatus.CANCELLED
+                ))),
+                any(OffsetDateTime.class)
+        );
     }
 
     @Test
