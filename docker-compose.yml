@@ -68,8 +68,8 @@ services:
     container_name: caddy
     restart: unless-stopped
     environment:
-      DOMAIN: ${DOMAIN}
-      MEDIA_DOMAIN: ${MEDIA_DOMAIN}
+       - DOMAIN=${DOMAIN:-localhost}
+       - MEDIA_DOMAIN=${MEDIA_DOMAIN:-pivnitsa-media-local}
     ports:
       - "80:80"
       - "443:443"
@@ -77,7 +77,7 @@ services:
     networks:
       - app-network
     volumes:
-      - ./caddy:/etc/caddy/caddy:ro
+      - ./conf:/etc/caddy
       - caddy-data:/data
       - caddy-config:/config
 
