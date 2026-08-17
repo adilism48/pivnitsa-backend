@@ -1,0 +1,15 @@
+{$DOMAIN:localhost} {
+    encode zstd gzip
+
+    reverse_proxy backend:8080 {
+        header_up X-Real-IP {remote_host}
+    }
+}
+
+{$MEDIA_DOMAIN:media.localhost} {
+    encode zstd gzip
+
+    reverse_proxy garage_s3:3902 {
+        flush_interval -1
+    }
+}
