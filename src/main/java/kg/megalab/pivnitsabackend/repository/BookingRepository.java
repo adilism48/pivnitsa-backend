@@ -48,4 +48,26 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("statuses") Collection<BookingStatus> statuses,
             @Param("now") OffsetDateTime now
     );
+
+    @Query("""
+    SELECT new kg.megalab.pivnitsabackend.dto.booking.BookingResponse(
+        b.id,
+        t.tableNumber,
+        b.guestsCount,
+        b.bookingAt,
+        b.amount,
+        b.status
+    )
+    FROM Booking b
+    JOIN ClubTable t ON t.id = b.clubTableId
+    WHERE b.userId = :userId
+      AND b.status IN :statuses
+      AND b.bookingAt < :now
+    ORDER BY b.bookingAt DESC
+    """)
+    List<BookingResponse> findBookingHistory(
+            @Param("userId") Long userId,
+            @Param("statuses") Collection<BookingStatus> statuses,
+            @Param("now") OffsetDateTime now
+    );
 }

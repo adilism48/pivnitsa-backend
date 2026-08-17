@@ -31,4 +31,15 @@ public class BookingController {
                 bookingService.getActiveBookings(phone)
         );
     }
+
+    @GetMapping("/history")
+    public ResponseEntity<List<BookingResponse>> getBookingHistory(
+            Authentication authentication
+    ) {
+        String phone = authentication.getName();
+
+        return ResponseEntity.ok(
+                bookingService.getBookingHistory(phone)
+        );
+    }
 }
