@@ -77,7 +77,7 @@ services:
     networks:
       - app-network
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy:/etc/caddy/caddy:ro
       - caddy-data:/data
       - caddy-config:/config
 
