@@ -29,7 +29,7 @@ public class EventWebController {
     private final EventService eventService;
 
 
-    @GetMapping(value = "/{id}", produces = MediaType.TEXT_HTML_VALUE)
+    @GetMapping(value = "/share/{id}", produces = MediaType.TEXT_HTML_VALUE)
     public String getSharePage(@PathVariable Long id,
                                @RequestHeader(value = "User-Agent", required = false) String userAgent,
                                Model model) {

@@ -1,4 +1,5 @@
 server:
+  forward-headers-strategy: framework
   port: ${PORT:8080}
 
 spring:
@@ -66,8 +67,8 @@ app:
     password: ${INITIAL_OWNER_PASSWORD:}
     full-name: ${INITIAL_OWNER_FULL_NAME:Owner}
   mobile:
-    canonicalUrl: "https://www.example.com/events/"
+    canonicalUrl: ${MOBILE_CANONICAL_URL:https://www.localhost/events/}
     #   deep link prefix example - org.example.app://events/
-    deep-link-prefix:
-    ios-store: "https://apps.apple.com/app/youtube/id544007664"
-    android-store: "https://play.google.com/store/apps/details?id=com.google.android.youtube"
+    deep-link-prefix: ${MOBILE_DEEP_LINK_PREFIX:app://events/}
+    ios-store: ${MOBILE_IOS_STORE:https://apps.apple.com/app/youtube/id544007664}
+    android-store: ${MOBILE_ANDROID_STORE:https://play.google.com/store/apps/details?id=com.google.android.youtube}
