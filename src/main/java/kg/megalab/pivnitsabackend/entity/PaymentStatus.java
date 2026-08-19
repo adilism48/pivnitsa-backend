@@ -2,7 +2,9 @@ package kg.megalab.pivnitsabackend.entity;
 
 public enum PaymentStatus {
     PENDING,
-    SUCCEEDED,
+    PAID,
     FAILED,
+    EXPIRED,
+    PARTIALLY_REFUNDED,
     REFUNDED
 }

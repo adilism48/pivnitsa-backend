@@ -4,6 +4,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import kg.megalab.pivnitsabackend.exception.otpexceptions.InvalidOtpException;
 import kg.megalab.pivnitsabackend.exception.otpexceptions.OtpAlreadySentException;
 import kg.megalab.pivnitsabackend.exception.otpexceptions.OtpExpiredException;
+import kg.megalab.pivnitsabackend.exception.paymentexception.InvalidPaymentStateException;
+import kg.megalab.pivnitsabackend.exception.paymentexception.PaymentNotFoundException;
+import kg.megalab.pivnitsabackend.exception.paymentexception.PaymentProviderException;
 import kg.megalab.pivnitsabackend.exception.staffexception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +22,51 @@ import java.time.ZoneOffset;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(PaymentNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlePaymentNotFound(
+            PaymentNotFoundException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponse response = new ErrorResponse(
+                OffsetDateTime.now(ZoneOffset.UTC),
+                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(InvalidPaymentStateException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidPaymentState(
+            InvalidPaymentStateException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponse response = new ErrorResponse(
+                OffsetDateTime.now(ZoneOffset.UTC),
+                HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(PaymentProviderException.class)
+    public ResponseEntity<ErrorResponse> handlePaymentProvider(
+            PaymentProviderException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponse response = new ErrorResponse(
+                OffsetDateTime.now(ZoneOffset.UTC),
+                HttpStatus.BAD_GATEWAY.value(),
+                HttpStatus.BAD_GATEWAY.getReasonPhrase(),
+                "Payment provider is temporarily unavailable",
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(response);
+    }
 
     @ExceptionHandler(InvalidStaffCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleInvalidStaffCredentials(InvalidStaffCredentialsException ex, HttpServletRequest request) {
@@ -71,6 +119,20 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(StaffNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleStaffNotFound(StaffNotFoundException ex, HttpServletRequest request) {
+        ErrorResponse response = new ErrorResponse(
+                OffsetDateTime.now(ZoneOffset.UTC),
+                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+
+
+    }
+
+    @ExceptionHandler(BookingNotFoundException.class)
+    public ResponseEntity<ErrorResponse> BookingNotFound(BookingNotFoundException ex, HttpServletRequest request) {
         ErrorResponse response = new ErrorResponse(
                 OffsetDateTime.now(ZoneOffset.UTC),
                 HttpStatus.NOT_FOUND.value(),

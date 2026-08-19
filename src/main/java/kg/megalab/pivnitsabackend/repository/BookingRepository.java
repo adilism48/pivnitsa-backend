@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
+
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("""
@@ -20,5 +22,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     boolean existsActivePaidBookingByUserId(
             @Param("userId") Long userId,
             @Param("status") BookingStatus status
+    );
+
+    Optional<Booking> findByIdAndUserId(
+            Long bookingId,
+            Long userId
     );
 }
