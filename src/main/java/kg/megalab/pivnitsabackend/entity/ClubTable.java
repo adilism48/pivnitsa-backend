@@ -3,43 +3,30 @@ package kg.megalab.pivnitsabackend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "bookings")
+@Table(name = "club_tables")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+public class ClubTable {
 
-public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "guests_count", nullable = false)
-    private Integer guestsCount;
+    @Column(name = "table_number", nullable = false, unique = true)
+    private String tableNumber;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @Column(name = "capacity", nullable = false)
+    private Integer capacity;
 
-    @Column(name = "club_table_id", nullable = false)
-    private Long clubTableId;
-
-    @Column(name = "event_id")
-    private Long eventId;
-
-    @Column(name = "booking_at", nullable = false)
-    private OffsetDateTime bookingAt;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private BookingStatus status;
-
-    @Column(name = "amount", nullable = false)
-    private BigDecimal amount;
+    @Column(name = "active", nullable = false)
+    @Builder.Default
+    private boolean active = true;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;

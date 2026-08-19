@@ -4,13 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -26,13 +26,13 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(
+                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)
+                        )
+                )
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session ->
@@ -42,21 +42,16 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/v1/auth/send-otp",
                                 "/api/v1/auth/verify-otp",
-                                "/api/v1/staff/auth/login",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/actuator/**",
                                 "/api/v1/auth/login/send-otp",
                                 "/api/v1/auth/login/verify-otp",
-                                "/error",
-                                "/events/**"
+                                "/error"
                         ).permitAll()
 
                         // GET Open for non auth user
-                        .requestMatchers(HttpMethod.POST, "/api/v1/staff/manage").hasRole("OWNER")
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/staff/manage/{id}/financial-access").hasRole("OWNER")
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/staff/manage/{id}/deactivate").hasAnyRole("STAFF", "OWNER")
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/v1/events",
