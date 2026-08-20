@@ -55,8 +55,14 @@ public class DeviceTokenService {
     }
 
     @Transactional
-    public void removeToken(String token) {
-        deviceTokenRepository.deleteByToken(token);
+    public void removeToken(String phone, String token) {
+        User user = getVerifiedUser(phone);
+
+        int deleted = deviceTokenRepository.deleteByTokenAndUserId(token, user.getId());
+
+        if (deleted == 0) {
+            log.warn("Попытка удаления несуществующего/чужого токена, userId={}", user.getId());
+        }
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
