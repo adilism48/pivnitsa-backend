@@ -61,7 +61,7 @@ public class EventService {
         String bannerUrl = s3FileStorageService.upload(request.file(), "banners");
 
         try {
-            Event savedEvent = transactionTemplate.execute(status -> {
+            Event savedEvent = transactionTemplate.execute(_ -> {
                 Event event = Event.builder()
                         .title(request.title())
                         .description(request.description())
@@ -106,7 +106,7 @@ public class EventService {
         final String[] oldBannerUrlHolder = new String[1];
 
         try {
-            Event updatedEvent = transactionTemplate.execute(status -> {
+            Event updatedEvent = transactionTemplate.execute(_ -> {
                 Event event = getEvent(id);
 
                 oldBannerUrlHolder[0] = event.getBannerUrl();
@@ -219,11 +219,19 @@ public class EventService {
     }
 
     private void checkAndTriggerNotification(Event event) {
-        log.info("Проверка отправки: status={}, sent={}", event.getStatus(), event.isNotificationSent());
-        if (event.getStatus() == EventStatus.PUBLISHED && !event.isNotificationSent()) {
+
+        if (event.getStatus() != EventStatus.PUBLISHED || event.isNotificationSent()) {
+            return;
+        }
+
+        int updated = eventRepository.markNotifiedIfNotAlready(event.getId());
+
+        if (updated == 1) {
             event.setNotificationSent(true);
             eventPublisher.publishEvent(new EventPublishedEvent(event.getId(), event.getTitle()));
             log.info("Запланирована отправка push-уведомления для мероприятия id={}", event.getId());
+        } else {
+            log.info("Уведомление для мероприятия id={} уже было отправлено параллельно, пропуск", event.getId());
         }
     }
 }

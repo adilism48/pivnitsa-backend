@@ -28,8 +28,8 @@ public class DeviceTokenController {
     }
 
     @DeleteMapping("/tokens")
-    public ResponseEntity<Void> removeToken(@RequestParam String token) {
-        deviceTokenService.removeToken(token);
+    public ResponseEntity<Void> removeToken(@AuthenticationPrincipal String phone, @RequestParam String token) {
+        deviceTokenService.removeToken(phone, token);
         return ResponseEntity.noContent().build();
     }
 }
