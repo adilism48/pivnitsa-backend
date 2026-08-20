@@ -45,7 +45,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
-                                "/actuator/**",
+                                "/actuator/health",
                                 "/api/v1/auth/login/send-otp",
                                 "/api/v1/auth/login/verify-otp",
                                 "/error"
@@ -60,6 +60,10 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/v1/auth/complete-profile")
                         .hasAnyRole("PRE_AUTH", "FULL_ACCESS")
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/v1/payments/webhooks/**"
+                        ).permitAll()
                         .anyRequest().hasRole("FULL_ACCESS")
                 )
                 .addFilterBefore(
@@ -79,8 +83,12 @@ public class SecurityConfig {
                 "http://127.0.0.1:*"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setExposedHeaders(List.of("Authorization"));
+        configuration.setAllowedHeaders(List.of(
+                "Authorization",
+                "Content-Type",
+                "Idempotency-Key"
+        ));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

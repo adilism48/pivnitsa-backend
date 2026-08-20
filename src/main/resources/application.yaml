@@ -71,3 +71,7 @@ app:
     deep-link-prefix:
     ios-store: "https://apps.apple.com/app/youtube/id544007664"
     android-store: "https://play.google.com/store/apps/details?id=com.google.android.youtube"
+  payment:
+    redirect:
+      success-url: ${PAYMENT_SUCCESS_URL:http://localhost:8080/payments/result/success}
+      failure-url: ${PAYMENT_FAILURE_URL:http://localhost:8080/payments/result/failure}

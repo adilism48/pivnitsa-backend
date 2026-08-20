@@ -4,6 +4,7 @@ import kg.megalab.pivnitsabackend.entity.*;
 import kg.megalab.pivnitsabackend.exception.BookingNotFoundException;
 import kg.megalab.pivnitsabackend.exception.UserNotFoundException;
 import kg.megalab.pivnitsabackend.exception.paymentexception.InvalidPaymentStateException;
+import kg.megalab.pivnitsabackend.exception.paymentexception.PaymentNotFoundException;
 import kg.megalab.pivnitsabackend.exception.paymentexception.PaymentProviderException;
 import kg.megalab.pivnitsabackend.payment.PaymentProvider;
 import kg.megalab.pivnitsabackend.payment.PaymentProviderRegistry;
@@ -67,6 +68,23 @@ public class PaymentService {
         }
 
         validateBooking(booking);
+
+        Payment pendingPayment = paymentRepository
+                .findFirstByBookingIdAndStatusOrderByCreatedAtDesc(
+                        booking.getId(),
+                        PaymentStatus.PENDING
+                )
+                .orElse(null);
+
+        if (pendingPayment != null) {
+            validateIdempotentRequest(
+                    pendingPayment,
+                    booking,
+                    providerCode
+            );
+
+            return toInitiationResult(pendingPayment);
+        }
 
         PaymentProvider provider =
                 providerRegistry.getRequired(providerCode);
@@ -256,7 +274,13 @@ public class PaymentService {
         } catch (DataIntegrityViolationException ex) {
             Payment existing = paymentRepository
                     .findByMerchantOrderId(candidate.getMerchantOrderId())
-                    .orElseThrow(() -> ex);
+                    .orElseGet(() -> paymentRepository
+                            .findFirstByBookingIdAndStatusOrderByCreatedAtDesc(
+                                    booking.getId(),
+                                    PaymentStatus.PENDING
+                            )
+                            .orElseThrow(() -> ex)
+                    );
 
             validateIdempotentRequest(
                     existing,
@@ -266,6 +290,31 @@ public class PaymentService {
 
             return new PendingPaymentDecision(existing, false);
         }
+    }
+
+    public PaymentInitiationResult getPayment(
+            Long paymentId,
+            String authenticatedPhone
+    ) {
+        User user = userRepository.findByPhone(authenticatedPhone)
+                .filter(User::isPhoneVerified)
+                .filter(foundUser ->
+                        !Boolean.TRUE.equals(foundUser.getIsDeleted())
+                )
+                .orElseThrow(() ->
+                        new UserNotFoundException("User not found")
+                );
+
+        Payment payment = paymentRepository
+                .findByIdAndBookingUserId(
+                        paymentId,
+                        user.getId()
+                )
+                .orElseThrow(() ->
+                        new PaymentNotFoundException("Payment not found")
+                );
+
+        return toInitiationResult(payment);
     }
 
     private record PendingPaymentDecision(
