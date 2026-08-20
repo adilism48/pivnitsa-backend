@@ -1,8 +1,0 @@
-ALTER TABLE events
-    ADD COLUMN notification_sent BOOLEAN NOT NULL DEFAULT FALSE;
-
-CREATE TABLE event_subscriptions
-(
-    user_id    BIGINT PRIMARY KEY REFERENCES users (id) ON DELETE CASCADE,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
-);

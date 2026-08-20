@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -58,6 +60,11 @@ public class UserNotificationSettingsServiceImpl
                 settingsRepository.save(settings);
 
         return toResponse(savedSettings);
+    }
+
+    @Override
+    public List<Long> getAllEventSubscribedUserIds() {
+        return settingsRepository.findAllEventSubscribedUserIds();
     }
 
     private User getVerifiedUser(String phone) {
