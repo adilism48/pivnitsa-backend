@@ -11,5 +11,7 @@ import java.util.Optional;
 public interface ClubTableRepository extends JpaRepository<ClubTable, Long> {
     Optional<ClubTable> findByTableNumber(String tableNumber);
 
+    List<ClubTable> findByHallId(Long hallId);
+
     List<ClubTable> findByActive(boolean active);
 }

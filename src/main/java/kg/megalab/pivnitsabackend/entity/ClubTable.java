@@ -18,6 +18,9 @@ public class ClubTable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "hall_id", nullable = false)
+    private Long hallId;
+
     @Column(name = "table_number", nullable = false, unique = true)
     private String tableNumber;
 

@@ -1,10 +1,14 @@
 package kg.megalab.pivnitsabackend.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import kg.megalab.pivnitsabackend.entity.Hall;
+import kg.megalab.pivnitsabackend.exception.hall.HallNotFoundException;
 import kg.megalab.pivnitsabackend.exception.otpexceptions.InvalidOtpException;
 import kg.megalab.pivnitsabackend.exception.otpexceptions.OtpAlreadySentException;
 import kg.megalab.pivnitsabackend.exception.otpexceptions.OtpExpiredException;
 import kg.megalab.pivnitsabackend.exception.staffexception.*;
+import kg.megalab.pivnitsabackend.exception.tables.TableNotFoundException;
+import kg.megalab.pivnitsabackend.exception.tables.TableNumberAlreadyExistException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -19,6 +23,42 @@ import java.time.ZoneOffset;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(HallNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleHallNotFound(HallNotFoundException ex, HttpServletRequest request) {
+        ErrorResponse response = new ErrorResponse(
+                OffsetDateTime.now(ZoneOffset.UTC),
+                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(TableNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleTableNotFound(TableNotFoundException ex, HttpServletRequest request) {
+        ErrorResponse response = new ErrorResponse(
+                OffsetDateTime.now(ZoneOffset.UTC),
+                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(TableNumberAlreadyExistException.class)
+    public ResponseEntity<ErrorResponse> handleTableNumberAlreadyExist(TableNumberAlreadyExistException ex, HttpServletRequest request) {
+        ErrorResponse response = new ErrorResponse(
+                OffsetDateTime.now(ZoneOffset.UTC),
+                HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
 
     @ExceptionHandler(InvalidStaffCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleInvalidStaffCredentials(InvalidStaffCredentialsException ex, HttpServletRequest request) {
