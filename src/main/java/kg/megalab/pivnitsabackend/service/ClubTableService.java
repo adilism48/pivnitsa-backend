@@ -1,9 +1,9 @@
 package kg.megalab.pivnitsabackend.service;
 
-import kg.megalab.pivnitsabackend.dto.table.CreateTableRequest;
-import kg.megalab.pivnitsabackend.dto.table.TableResponse;
+import kg.megalab.pivnitsabackend.dto.table.*;
 import kg.megalab.pivnitsabackend.entity.ClubTable;
 import kg.megalab.pivnitsabackend.exception.hall.HallNotFoundException;
+import kg.megalab.pivnitsabackend.exception.tables.TableNotFoundException;
 import kg.megalab.pivnitsabackend.exception.tables.TableNumberAlreadyExistException;
 import kg.megalab.pivnitsabackend.repository.ClubTableRepository;
 import kg.megalab.pivnitsabackend.repository.HallRepository;
@@ -34,6 +34,56 @@ public class ClubTableService {
                 .capacity(request.capacity())
                 .hallId(request.hallId())
                 .build();
+
+        clubTable = clubTableRepository.save(clubTable);
+
+        return toResponse(clubTable);
+    }
+
+    @Transactional
+    public TableResponse updateTable(Long id, UpdateTableRequest request) {
+        ClubTable clubTable = clubTableRepository.findById(id)
+                .orElseThrow(() -> new TableNotFoundException("Столик не найден"));
+
+        if (request.tableNumber() != null && !request.tableNumber().equals(clubTable.getTableNumber())) {
+            clubTableRepository.findByTableNumber(request.tableNumber())
+                    .filter(existing -> !existing.getId().equals(id))
+                    .ifPresent(existing -> {
+                        throw new TableNumberAlreadyExistException("Такой столик уже существует");
+                    });
+            clubTable.setTableNumber(request.tableNumber());
+        }
+
+        if (request.hallId() != null && !request.hallId().equals(clubTable.getHallId())) {
+            if (hallRepository.findById(request.hallId()).isEmpty()) {
+                throw new HallNotFoundException("Такого зала не существует");
+            }
+            clubTable.setHallId(request.hallId());
+        }
+
+        if (request.capacity() != null) {
+            clubTable.setCapacity(request.capacity());
+        }
+
+        if (request.active() != null) {
+            clubTable.setActive(request.active());
+        }
+
+        if (request.category() != null) {
+            clubTable.setCategory(request.category());
+        }
+
+        if (request.positionX() != null) {
+            clubTable.setPositionX(request.positionX());
+        }
+
+        if (request.positionY() != null) {
+            clubTable.setPositionY(request.positionY());
+        }
+
+        if (request.depositAmount() != null) {
+            clubTable.setDepositAmount(request.depositAmount());
+        }
 
         clubTable = clubTableRepository.save(clubTable);
 

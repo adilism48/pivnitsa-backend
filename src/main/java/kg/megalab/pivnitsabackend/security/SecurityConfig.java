@@ -59,6 +59,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/staff/manage/{id}/deactivate").hasAnyRole("STAFF", "OWNER")
 
                         .requestMatchers(HttpMethod.POST, "/api/v1/tables").hasAnyRole("STAFF", "OWNER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/tables/{id}").hasAnyRole("STAFF", "OWNER")
+
 
                         // GET Open for non auth user
                         .requestMatchers(
