@@ -9,9 +9,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -32,13 +34,21 @@ class EventServiceTest {
     @Mock
     private S3FileStorageService s3FileStorageService;
 
+    @Mock
+    private TransactionTemplate transactionTemplate;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
     private EventService eventService;
 
     @BeforeEach
     void setUp() {
         eventService = new EventService(
                 eventRepository,
-                s3FileStorageService
+                s3FileStorageService,
+                transactionTemplate,
+                eventPublisher
         );
     }
 

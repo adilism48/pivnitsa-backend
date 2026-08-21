@@ -3,6 +3,8 @@ package kg.megalab.pivnitsabackend.service;
 import kg.megalab.pivnitsabackend.dto.notification.NotificationSettingsResponse;
 import kg.megalab.pivnitsabackend.dto.notification.UpdateNotificationSettingsRequest;
 
+import java.util.List;
+
 public interface UserNotificationSettingsService {
 
     NotificationSettingsResponse getCurrentUserSettings(String phone);
@@ -11,4 +13,6 @@ public interface UserNotificationSettingsService {
             String phone,
             UpdateNotificationSettingsRequest request
     );
+
+    List<Long> getAllEventSubscribedUserIds();
 }

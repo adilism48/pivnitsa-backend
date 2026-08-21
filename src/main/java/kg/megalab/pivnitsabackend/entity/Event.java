@@ -34,6 +34,10 @@ public class Event {
     @Builder.Default
     private EventStatus status = EventStatus.DRAFT;
 
+    @Column(name = "notification_sent", nullable = false)
+    @Builder.Default
+    private boolean notificationSent = false;
+
     @Column(name = "starts_at", nullable = false)
     private OffsetDateTime startsAt;
 

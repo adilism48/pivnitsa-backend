@@ -1,17 +1,21 @@
 package kg.megalab.pivnitsabackend.service;
 
 import kg.megalab.pivnitsabackend.dto.event.*;
+import kg.megalab.pivnitsabackend.dto.notification.EventPublishedEvent;
 import kg.megalab.pivnitsabackend.entity.Event;
 import kg.megalab.pivnitsabackend.entity.EventStatus;
 import kg.megalab.pivnitsabackend.exception.EventNotFoundException;
 import kg.megalab.pivnitsabackend.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -19,6 +23,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EventService {
 
     @Value("${app.mobile.canonicalUrl}")
@@ -26,6 +31,8 @@ public class EventService {
 
     private final EventRepository eventRepository;
     private final S3FileStorageService s3FileStorageService;
+    private final TransactionTemplate transactionTemplate;
+    private final ApplicationEventPublisher eventPublisher;
 
 
     public EventBannersResponse getEventBanners(int limit) {
@@ -54,28 +61,32 @@ public class EventService {
         String bannerUrl = s3FileStorageService.upload(request.file(), "banners");
 
         try {
-            Event event = Event.builder()
-                    .title(request.title())
-                    .description(request.description())
-                    .bannerUrl(bannerUrl)
-                    .status(request.status())
-                    .startsAt(request.startsAt())
-                    .endsAt(request.endsAt())
-                    .build();
+            Event savedEvent = transactionTemplate.execute(_ -> {
+                Event event = Event.builder()
+                        .title(request.title())
+                        .description(request.description())
+                        .bannerUrl(bannerUrl)
+                        .status(request.status())
+                        .startsAt(request.startsAt())
+                        .endsAt(request.endsAt())
+                        .build();
 
-            event = eventRepository.save(event);
+                Event saved = eventRepository.save(event);
+                checkAndTriggerNotification(saved);
+                return saved;
+            });
 
             return new EventResponse(
-                    event.getId(),
-                    event.getTitle(),
-                    event.getDescription(),
+                    savedEvent.getId(),
+                    savedEvent.getTitle(),
+                    savedEvent.getDescription(),
                     s3FileStorageService.toFullUrl(bannerUrl),
-                    event.getStatus(),
-                    canonicalUrl + event.getId(),
-                    event.getStartsAt(),
-                    event.getEndsAt(),
-                    event.getCreatedAt(),
-                    event.getUpdatedAt()
+                    savedEvent.getStatus(),
+                    canonicalUrl + savedEvent.getId(),
+                    savedEvent.getStartsAt(),
+                    savedEvent.getEndsAt(),
+                    savedEvent.getCreatedAt(),
+                    savedEvent.getUpdatedAt()
             );
         } catch (Exception e) {
             s3FileStorageService.delete(bannerUrl);
@@ -84,47 +95,56 @@ public class EventService {
     }
 
     public EventResponse update(Long id, UpdateEventRequest request) {
-
-        Event event = getEvent(id);
-
-        String oldBannerUrl = event.getBannerUrl();
         String newBannerUrl = null;
-
-        event.setTitle(request.title());
-        event.setDescription(request.description());
-        event.setStatus(request.status());
-        event.setStartsAt(request.startsAt());
-        event.setEndsAt(request.endsAt());
-
         boolean hasNewFile = request.file() != null && !request.file().isEmpty();
 
         if (hasNewFile) {
             newBannerUrl = s3FileStorageService.upload(request.file(), "banners");
-            event.setBannerUrl(newBannerUrl);
         }
 
-        try {
-            event = eventRepository.save(event);
+        final String uploadedBannerUrl = newBannerUrl;
+        final String[] oldBannerUrlHolder = new String[1];
 
-            if (hasNewFile && oldBannerUrl != null) {
-                s3FileStorageService.delete(oldBannerUrl);
+        try {
+            Event updatedEvent = transactionTemplate.execute(_ -> {
+                Event event = getEvent(id);
+
+                oldBannerUrlHolder[0] = event.getBannerUrl();
+
+                if (request.title() != null) event.setTitle(request.title());
+                if (request.description() != null) event.setDescription(request.description());
+                if (request.status() != null) event.setStatus(request.status());
+                if (request.startsAt() != null) event.setStartsAt(request.startsAt());
+                if (request.endsAt() != null) event.setEndsAt(request.endsAt());
+
+                if (uploadedBannerUrl != null) {
+                    event.setBannerUrl(uploadedBannerUrl);
+                }
+
+                checkAndTriggerNotification(event);
+                return eventRepository.save(event);
+            });
+
+            if (uploadedBannerUrl != null && oldBannerUrlHolder[0] != null) {
+                s3FileStorageService.delete(oldBannerUrlHolder[0]);
             }
 
             return new EventResponse(
-                    event.getId(),
-                    event.getTitle(),
-                    event.getDescription(),
-                    s3FileStorageService.toFullUrl(event.getBannerUrl()),
-                    event.getStatus(),
-                    canonicalUrl + event.getId(),
-                    event.getStartsAt(),
-                    event.getEndsAt(),
-                    event.getCreatedAt(),
-                    event.getUpdatedAt()
+                    updatedEvent.getId(),
+                    updatedEvent.getTitle(),
+                    updatedEvent.getDescription(),
+                    s3FileStorageService.toFullUrl(updatedEvent.getBannerUrl()),
+                    updatedEvent.getStatus(),
+                    canonicalUrl + updatedEvent.getId(),
+                    updatedEvent.getStartsAt(),
+                    updatedEvent.getEndsAt(),
+                    updatedEvent.getCreatedAt(),
+                    updatedEvent.getUpdatedAt()
             );
+
         } catch (Exception e) {
-            if (newBannerUrl != null) {
-                s3FileStorageService.delete(newBannerUrl);
+            if (uploadedBannerUrl != null) {
+                s3FileStorageService.delete(uploadedBannerUrl);
             }
             throw e;
         }
@@ -198,5 +218,20 @@ public class EventService {
         return eventRepository.findById(id).orElseThrow(() -> new EventNotFoundException("Event not found, id: " + id));
     }
 
+    private void checkAndTriggerNotification(Event event) {
 
+        if (event.getStatus() != EventStatus.PUBLISHED || event.isNotificationSent()) {
+            return;
+        }
+
+        int updated = eventRepository.markNotifiedIfNotAlready(event.getId());
+
+        if (updated == 1) {
+            event.setNotificationSent(true);
+            eventPublisher.publishEvent(new EventPublishedEvent(event.getId(), event.getTitle()));
+            log.info("Запланирована отправка push-уведомления для мероприятия id={}", event.getId());
+        } else {
+            log.info("Уведомление для мероприятия id={} уже было отправлено параллельно, пропуск", event.getId());
+        }
+    }
 }
