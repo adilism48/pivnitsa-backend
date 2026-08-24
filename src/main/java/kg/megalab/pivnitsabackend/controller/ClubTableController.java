@@ -29,4 +29,10 @@ public class ClubTableController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTable(@PathVariable Long id) {
+        clubTableService.deleteTable(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }

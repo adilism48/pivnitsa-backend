@@ -1,12 +1,16 @@
 package kg.megalab.pivnitsabackend.service;
 
 import kg.megalab.pivnitsabackend.dto.table.*;
+import kg.megalab.pivnitsabackend.entity.Booking;
 import kg.megalab.pivnitsabackend.entity.ClubTable;
 import kg.megalab.pivnitsabackend.exception.hall.HallNotFoundException;
+import kg.megalab.pivnitsabackend.exception.tables.TableHasBookingReservationException;
 import kg.megalab.pivnitsabackend.exception.tables.TableNotFoundException;
 import kg.megalab.pivnitsabackend.exception.tables.TableNumberAlreadyExistException;
+import kg.megalab.pivnitsabackend.repository.BookingRepository;
 import kg.megalab.pivnitsabackend.repository.ClubTableRepository;
 import kg.megalab.pivnitsabackend.repository.HallRepository;
+import kg.megalab.pivnitsabackend.repository.BookingRepository.*;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +22,7 @@ public class ClubTableService {
 
     private final ClubTableRepository clubTableRepository;
     private final HallRepository hallRepository;
+    private final BookingRepository bookingRepository;
 
     @Transactional
     public TableResponse createTable(CreateTableRequest request) {
@@ -88,6 +93,16 @@ public class ClubTableService {
         clubTable = clubTableRepository.save(clubTable);
 
         return toResponse(clubTable);
+    }
+
+    public void deleteTable(Long id) {
+        ClubTable clubTable = clubTableRepository.findById(id)
+                .orElseThrow(() -> new TableNotFoundException("Столик не найден"));
+
+        if (bookingRepository.existsActiveBookingByTableId(id)) {
+            throw new TableHasBookingReservationException("Столик забронирован, нельзя удалить");
+        }
+        clubTableRepository.delete(clubTable);
     }
 
     private TableResponse toResponse(ClubTable clubTable) {
