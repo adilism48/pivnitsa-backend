@@ -1,7 +1,6 @@
 package kg.megalab.pivnitsabackend.service;
 
 import kg.megalab.pivnitsabackend.dto.table.*;
-import kg.megalab.pivnitsabackend.entity.Booking;
 import kg.megalab.pivnitsabackend.entity.ClubTable;
 import kg.megalab.pivnitsabackend.exception.hall.HallNotFoundException;
 import kg.megalab.pivnitsabackend.exception.tables.TableHasBookingReservationException;
