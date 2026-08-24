@@ -32,6 +32,8 @@ build/
 ### VS Code ###
 .vscode/
 .env
+docker-compose.override.yml
+
 
 # Firebase secrets
 firebase-service-account.json
