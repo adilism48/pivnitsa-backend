@@ -1,4 +1,4 @@
-package kg.megalab.pivnitsabackend.service;
+package kg.megalab.pivnitsabackend.service.notifications;
 
 import kg.megalab.pivnitsabackend.dto.notification.NotificationSettingsResponse;
 import kg.megalab.pivnitsabackend.dto.notification.UpdateNotificationSettingsRequest;
@@ -7,7 +7,6 @@ import kg.megalab.pivnitsabackend.entity.UserNotificationSettings;
 import kg.megalab.pivnitsabackend.exception.UserNotFoundException;
 import kg.megalab.pivnitsabackend.repository.UserNotificationSettingsRepository;
 import kg.megalab.pivnitsabackend.repository.UserRepository;
-import kg.megalab.pivnitsabackend.service.notifications.UserNotificationSettingsServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,4 +1,4 @@
-package kg.megalab.pivnitsabackend.service;
+package kg.megalab.pivnitsabackend.service.notifications;
 
 import kg.megalab.pivnitsabackend.dto.notification.RegisterTokenRequest;
 import kg.megalab.pivnitsabackend.entity.User;

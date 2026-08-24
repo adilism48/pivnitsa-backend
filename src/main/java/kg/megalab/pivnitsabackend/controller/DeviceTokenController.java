@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import kg.megalab.pivnitsabackend.config.OpenApiConfig;
 import kg.megalab.pivnitsabackend.dto.notification.RegisterTokenRequest;
-import kg.megalab.pivnitsabackend.service.DeviceTokenService;
+import kg.megalab.pivnitsabackend.service.notifications.DeviceTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

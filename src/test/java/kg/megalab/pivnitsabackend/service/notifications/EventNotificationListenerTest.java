@@ -1,4 +1,4 @@
-package kg.megalab.pivnitsabackend.service;
+package kg.megalab.pivnitsabackend.service.notifications;
 
 import kg.megalab.pivnitsabackend.dto.notification.EventPublishedEvent;
 import kg.megalab.pivnitsabackend.dto.notification.PushNotification;
@@ -21,6 +21,7 @@ class EventNotificationListenerTest {
 
     @Mock private UserNotificationSettingsService notificationSettingsService;
     @Mock private PushNotificationService pushNotificationService;
+    @Mock private NotificationService notificationService;
     @InjectMocks private EventNotificationListener eventNotificationListener;
 
     @Test

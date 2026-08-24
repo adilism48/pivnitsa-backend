@@ -1,4 +1,4 @@
-package kg.megalab.pivnitsabackend.service;
+package kg.megalab.pivnitsabackend.service.notifications;
 
 import com.google.firebase.messaging.*;
 import kg.megalab.pivnitsabackend.dto.notification.PushNotification;
