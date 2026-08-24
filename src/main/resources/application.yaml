@@ -73,4 +73,4 @@ app:
     ios-store: ${MOBILE_IOS_STORE:https://apps.apple.com/app/youtube/id544007664}
     android-store: ${MOBILE_ANDROID_STORE:https://play.google.com/store/apps/details?id=com.google.android.youtube}
   firebase:
-    config-path: classpath:firebase-service-account.json
+    config-path: ${FIREBASE_CONFIG_PATH:classpath:firebase-service-account.json}

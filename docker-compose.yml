@@ -115,6 +115,9 @@ services:
       MOBILE_DEEP_LINK_PREFIX: ${MOBILE_DEEP_LINK_PREFIX:-app://events/}
       MOBILE_IOS_STORE: ${MOBILE_IOS_STORE:-https://apps.apple.com/app/youtube/id544007664}
       MOBILE_ANDROID_STORE: ${MOBILE_ANDROID_STORE:-https://play.google.com/store/apps/details?id=com.google.android.youtube}
+      FIREBASE_CONFIG_PATH: file:/app/secrets/firebase-service-account.json
+    volumes:
+      - ./firebase-service-account.json:/app/secrets/firebase-service-account.json:ro
     ports:
       - "127.0.0.1:8080:8080"
     networks:
