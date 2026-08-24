@@ -1,7 +1,8 @@
-package kg.megalab.pivnitsabackend.service;
+package kg.megalab.pivnitsabackend.service.notifications;
 
 import com.google.firebase.messaging.*;
 import kg.megalab.pivnitsabackend.dto.notification.PushNotification;
+import kg.megalab.pivnitsabackend.service.DeviceTokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

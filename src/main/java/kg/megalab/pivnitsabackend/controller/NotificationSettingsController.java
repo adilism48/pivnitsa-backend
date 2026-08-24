@@ -6,7 +6,7 @@ import jakarta.validation.Valid;
 import kg.megalab.pivnitsabackend.config.OpenApiConfig;
 import kg.megalab.pivnitsabackend.dto.notification.NotificationSettingsResponse;
 import kg.megalab.pivnitsabackend.dto.notification.UpdateNotificationSettingsRequest;
-import kg.megalab.pivnitsabackend.service.UserNotificationSettingsService;
+import kg.megalab.pivnitsabackend.service.notifications.UserNotificationSettingsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

@@ -1,10 +1,12 @@
 package kg.megalab.pivnitsabackend.listener;
 
-import com.google.firebase.messaging.*;
 import kg.megalab.pivnitsabackend.dto.notification.EventPublishedEvent;
 import kg.megalab.pivnitsabackend.dto.notification.PushNotification;
-import kg.megalab.pivnitsabackend.service.PushNotificationService;
-import kg.megalab.pivnitsabackend.service.UserNotificationSettingsService;
+import kg.megalab.pivnitsabackend.entity.NotificationTargetType;
+import kg.megalab.pivnitsabackend.entity.NotificationType;
+import kg.megalab.pivnitsabackend.service.notifications.NotificationService;
+import kg.megalab.pivnitsabackend.service.notifications.PushNotificationService;
+import kg.megalab.pivnitsabackend.service.notifications.UserNotificationSettingsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -22,6 +24,7 @@ public class EventNotificationListener {
 
     private final UserNotificationSettingsService notificationSettingsService;
     private final PushNotificationService pushNotificationService;
+    private final NotificationService notificationService;
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -31,6 +34,16 @@ public class EventNotificationListener {
         List<Long> subscribedUserIds = notificationSettingsService.getAllEventSubscribedUserIds();
         log.info("Найдено подписчиков: {}", subscribedUserIds.size());
         if (subscribedUserIds.isEmpty()) return;
+
+        notificationService.createForUsers(
+                subscribedUserIds,
+                NotificationType.EVENT_PUBLISHED,
+                "Новое мероприятие!",
+                event.eventTitle(),
+                NotificationTargetType.EVENT,
+                event.eventId(),
+                "EVENT_PUBLISHED:" + event.eventId()
+        );
 
         pushNotificationService.sendToUsers(subscribedUserIds, new PushNotification(
                 "Новое мероприятие!",
