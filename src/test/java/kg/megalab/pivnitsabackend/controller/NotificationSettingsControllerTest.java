@@ -2,7 +2,7 @@ package kg.megalab.pivnitsabackend.controller;
 
 import kg.megalab.pivnitsabackend.dto.notification.NotificationSettingsResponse;
 import kg.megalab.pivnitsabackend.dto.notification.UpdateNotificationSettingsRequest;
-import kg.megalab.pivnitsabackend.service.UserNotificationSettingsService;
+import kg.megalab.pivnitsabackend.service.notifications.UserNotificationSettingsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

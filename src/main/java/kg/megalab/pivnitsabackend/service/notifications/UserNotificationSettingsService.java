@@ -1,4 +1,4 @@
-package kg.megalab.pivnitsabackend.service;
+package kg.megalab.pivnitsabackend.service.notifications;
 
 import kg.megalab.pivnitsabackend.dto.notification.NotificationSettingsResponse;
 import kg.megalab.pivnitsabackend.dto.notification.UpdateNotificationSettingsRequest;
