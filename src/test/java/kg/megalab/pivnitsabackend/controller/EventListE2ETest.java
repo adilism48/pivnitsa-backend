@@ -1,19 +1,11 @@
 package kg.megalab.pivnitsabackend.controller;
 
+import kg.megalab.pivnitsabackend.BaseIntegrationTest;
 import kg.megalab.pivnitsabackend.entity.Event;
 import kg.megalab.pivnitsabackend.entity.EventStatus;
 import kg.megalab.pivnitsabackend.repository.EventRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.postgresql.PostgreSQLContainer;
-import org.testcontainers.utility.DockerImageName;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -23,28 +15,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@Testcontainers
-class EventListE2ETest {
-
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer postgres =
-            new PostgreSQLContainer("postgres:17-alpine");
-
-    @Container
-    @ServiceConnection
-    static GenericContainer<?> redis =
-            new GenericContainer<>(
-                    DockerImageName.parse("redis:7-alpine")
-            ).withExposedPorts(6379);
+class EventListE2ETest extends BaseIntegrationTest {
 
     @Autowired
     private EventRepository eventRepository;
-
-    @Autowired
-    private MockMvc mockMvc;
 
     @Test
     void shouldReturnUpcomingEventsWithoutAuthentication() throws Exception {

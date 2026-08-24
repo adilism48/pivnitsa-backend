@@ -509,6 +509,49 @@ GET www.example.com/events/{id}
 ```
 Ответ: HTML страница
 
+### US-28 — Push о новых вечеринках
+
+#### Регистрация device-токена
+
+```http
+POST /api/v1/devices/tokens
+```
+```json
+{
+  "token": "fcm-device-token",
+  "deviceType": "ANDROID"
+}
+```
+
+Успешный ответ — 200 OK
+
+#### Удаление device-токена
+
+```http
+DELETE /api/v1/devices/tokens?token=fcm-device-token
+```
+
+Удаляется только токен, принадлежащий авторизованному пользователю. Успешный ответ — 204 No Content
+
+#### Payload push-уведомления
+
+Отправляется через Firebase Cloud Messaging всем гостям, подписанным на уведомления о мероприятиях (event_notifications_enabled = true), в момент публикации мероприятия:
+
+```json
+{
+  "notification": {
+    "title": "Новое мероприятие!",
+    "body": "Event title"
+  },
+  "data": {
+    "type": "OPEN_EVENT",
+    "eventId": "1"
+  }
+}
+```
+
+По нажатию на push мобильное приложение читает type/eventId из data и открывает карточку мероприятия с этим id.
+
 ## База данных
 
 В локальном окружении используется PostgreSQL 17. Схема создаётся автоматически
