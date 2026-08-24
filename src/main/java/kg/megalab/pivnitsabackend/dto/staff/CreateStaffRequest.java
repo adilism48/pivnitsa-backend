@@ -3,8 +3,6 @@ package kg.megalab.pivnitsabackend.dto.staff;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import kg.megalab.pivnitsabackend.entity.StaffRole;
-import org.aspectj.weaver.ast.Not;
 
 public record CreateStaffRequest(
         @NotBlank(message = "Требуется Имя")
