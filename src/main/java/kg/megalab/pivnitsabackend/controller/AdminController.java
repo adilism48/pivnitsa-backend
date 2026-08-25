@@ -30,7 +30,7 @@ public class AdminController {
         return ResponseEntity.ok(bookingService.getAdminBookings(from, to));
     }
 
-    @PatchMapping("/{id}/cancel")
+    @PatchMapping("/bookings/{id}/cancel")
     public ResponseEntity<Void> cancelBooking(
             @PathVariable Long id,
             @Valid @RequestBody CancelBookingRequest request

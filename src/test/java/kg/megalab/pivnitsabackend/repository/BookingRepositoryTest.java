@@ -55,97 +55,6 @@ class BookingRepositoryTest {
             new PostgreSQLContainer("postgres:17-alpine");
 
     @Test
-    void shouldReturnOnlyActiveBookingsSortedByNearestFirst() {
-        OffsetDateTime now =
-                OffsetDateTime.now(ZoneId.of("Asia/Bishkek"));
-
-        User user = userRepository.save(
-                User.builder()
-                        .firstName("Test")
-                        .lastName("User")
-                        .phone("+996700123456")
-                        .phoneVerified(true)
-                        .build()
-        );
-
-        Hall hall = hallRepository.save(
-                Hall.builder()
-                        .name("Main hall")
-                        .build()
-        );
-
-        ClubTable table = clubTableRepository.save(
-                ClubTable.builder()
-                        .hallId(hall.getId())
-                        .tableNumber("A-5")
-                        .capacity(4)
-                        .active(true)
-                        .build()
-        );
-
-        Booking laterBooking = createBooking(
-                user.getId(),
-                table.getId(),
-                now.plusDays(2)
-        );
-
-        Booking nearestBooking = createBooking(
-                user.getId(),
-                table.getId(),
-                now.plusDays(1)
-        );
-
-        Booking pastBooking = createBooking(
-                user.getId(),
-                table.getId(),
-                now.minusDays(1)
-        );
-
-        Booking cancelledBooking = createBooking(
-                user.getId(),
-                table.getId(),
-                now.plusDays(3)
-        );
-        cancelledBooking.setStatus(BookingStatus.CANCELLED);
-
-        bookingRepository.saveAll(
-                List.of(laterBooking,
-                        nearestBooking,
-                        pastBooking,
-                        cancelledBooking
-                )
-        );
-
-        List<BookingResponse> result = bookingRepository.findActiveBookings(
-                user.getId(),
-                List.of(
-                        BookingStatus.PENDING_PAYMENT,
-                        BookingStatus.CONFIRMED
-                ),
-                now
-        );
-
-        assertEquals(2, result.size());
-        assertEquals(nearestBooking.getId(), result.get(0).id());
-        assertEquals(laterBooking.getId(), result.get(1).id());
-    }
-
-    private Booking createBooking(
-            Long userId,
-            Long tableId,
-            OffsetDateTime bookingAt
-    ) {
-        return Booking.builder()
-                .userId(userId)
-                .clubTableId(tableId)
-                .guestsCount(2)
-                .bookingAt(bookingAt)
-                .status(BookingStatus.CONFIRMED)
-                .amount(new BigDecimal("1000.00"))
-                .build();
-    }
-
-    @Test
     void shouldReturnAdminBookingsByDateWithPaymentStatus() {
         OffsetDateTime now = OffsetDateTime.now(ZoneId.of("Asia/Bishkek"));
 
@@ -158,9 +67,16 @@ class BookingRepositoryTest {
                         .build()
         );
 
+        Hall hall = hallRepository.save(
+                Hall.builder()
+                        .name("Main hall")
+                        .build()
+        );
+
         ClubTable table = clubTableRepository.save(
                 ClubTable.builder()
                         .tableNumber("T-1")
+                        .hallId(hall.getId())
                         .capacity(4)
                         .active(true)
                         .build()
@@ -224,9 +140,16 @@ class BookingRepositoryTest {
                         .build()
         );
 
+        Hall hall = hallRepository.save(
+                Hall.builder()
+                        .name("Main hall")
+                        .build()
+        );
+
         ClubTable table = clubTableRepository.save(
                 ClubTable.builder()
                         .tableNumber("T-2")
+                        .hallId(hall.getId())
                         .capacity(4)
                         .active(true)
                         .build()

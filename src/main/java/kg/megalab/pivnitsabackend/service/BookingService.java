@@ -17,7 +17,6 @@ import kg.megalab.pivnitsabackend.repository.ClubTableRepository;
 import kg.megalab.pivnitsabackend.dto.booking.*;
 
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,24 +70,6 @@ public class BookingService {
             throw new TableNotAvailableException("Столик уже забронирован");
         }
 
-    }
-
-    @Transactional(readOnly = true)
-    public List<BookingResponse> getBookingHistory(String phone) {
-
-        User user = userRepository.findByPhone(phone)
-                .orElseThrow(() ->
-                        new UserNotFoundException("Пользователь не найден")
-                );
-
-        return bookingRepository.findBookingHistory(
-                user.getId(),
-                List.of(
-                        BookingStatus.COMPLETED,
-                        BookingStatus.CANCELLED
-                ),
-                OffsetDateTime.now()
-        );
     }
 
     @Transactional(readOnly = true)

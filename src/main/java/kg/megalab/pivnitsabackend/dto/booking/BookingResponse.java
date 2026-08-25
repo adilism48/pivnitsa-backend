@@ -1,6 +1,5 @@
 package kg.megalab.pivnitsabackend.dto.booking;
 
-import kg.megalab.pivnitsabackend.entity.Booking;
 import kg.megalab.pivnitsabackend.entity.BookingStatus;
 
 import java.math.BigDecimal;
