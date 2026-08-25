@@ -72,3 +72,5 @@ app:
     deep-link-prefix: ${MOBILE_DEEP_LINK_PREFIX:app://events/}
     ios-store: ${MOBILE_IOS_STORE:https://apps.apple.com/app/youtube/id544007664}
     android-store: ${MOBILE_ANDROID_STORE:https://play.google.com/store/apps/details?id=com.google.android.youtube}
+  firebase:
+    config-path: ${FIREBASE_CONFIG_PATH:classpath:firebase-service-account.json}

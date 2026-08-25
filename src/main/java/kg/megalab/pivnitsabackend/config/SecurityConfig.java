@@ -1,5 +1,6 @@
-package kg.megalab.pivnitsabackend.security;
+package kg.megalab.pivnitsabackend.config;
 
+import kg.megalab.pivnitsabackend.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
