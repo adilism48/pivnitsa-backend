@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ClubTableService {
@@ -102,6 +104,25 @@ public class ClubTableService {
             throw new TableHasBookingReservationException("Столик забронирован, нельзя удалить");
         }
         clubTableRepository.delete(clubTable);
+    }
+
+    public List<PublicTableResponse> getPublicTables(Long hallId) {
+        List<ClubTable> clubTables = (hallId != null)
+                ? clubTableRepository.findByHallId(hallId)
+                : clubTableRepository.findAll();
+
+        return clubTables.stream()
+                .filter(ClubTable::isActive)
+                .filter(table -> table.getPositionX() != null && table.getPositionY() != null)
+                .map(clubTable -> new PublicTableResponse(
+                        clubTable.getId(),
+                        clubTable.getTableNumber(),
+                        clubTable.getCapacity(),
+                        clubTable.getPositionX(),
+                        clubTable.getPositionY(),
+                        clubTable.getHallId(),
+                        clubTable.getCategory()
+                )).toList();
     }
 
     private TableResponse toResponse(ClubTable clubTable) {

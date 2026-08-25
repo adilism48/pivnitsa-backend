@@ -10,12 +10,21 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/tables")
 @RequiredArgsConstructor
 @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
 public class ClubTableController {
     private final ClubTableService clubTableService;
+
+    @GetMapping
+    public ResponseEntity<List<PublicTableResponse>> getTables(@RequestParam(required = false) Long hallId) {
+        List<PublicTableResponse> response = clubTableService.getPublicTables(hallId);
+        return ResponseEntity.ok(response);
+    }
+
 
     @PostMapping
     public ResponseEntity<TableResponse> createTable(@Valid @RequestBody CreateTableRequest request) {
@@ -34,5 +43,4 @@ public class ClubTableController {
         clubTableService.deleteTable(id);
         return ResponseEntity.noContent().build();
     }
-
 }
