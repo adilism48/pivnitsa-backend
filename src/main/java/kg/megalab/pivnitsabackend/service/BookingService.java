@@ -1,9 +1,13 @@
 package kg.megalab.pivnitsabackend.service;
 
+import kg.megalab.pivnitsabackend.dto.admin.AdminBookingResponse;
+import kg.megalab.pivnitsabackend.dto.booking.BookingResponse;
 import kg.megalab.pivnitsabackend.entity.Booking;
 import kg.megalab.pivnitsabackend.entity.BookingStatus;
 import kg.megalab.pivnitsabackend.entity.ClubTable;
 import kg.megalab.pivnitsabackend.entity.User;
+import kg.megalab.pivnitsabackend.exception.BookingNotFoundException;
+import kg.megalab.pivnitsabackend.exception.InvalidBookingStateException;
 import kg.megalab.pivnitsabackend.exception.UserNotFoundException;
 import kg.megalab.pivnitsabackend.repository.UserRepository;
 import kg.megalab.pivnitsabackend.exception.tables.TableNotFoundException;
@@ -19,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -66,6 +71,48 @@ public class BookingService {
             throw new TableNotAvailableException("Столик уже забронирован");
         }
 
+    }
+
+    @Transactional(readOnly = true)
+    public List<BookingResponse> getBookingHistory(String phone) {
+
+        User user = userRepository.findByPhone(phone)
+                .orElseThrow(() ->
+                        new UserNotFoundException("Пользователь не найден")
+                );
+
+        return bookingRepository.findBookingHistory(
+                user.getId(),
+                List.of(
+                        BookingStatus.COMPLETED,
+                        BookingStatus.CANCELLED
+                ),
+                OffsetDateTime.now()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<AdminBookingResponse> getAdminBookings(OffsetDateTime from, OffsetDateTime to) {
+        OffsetDateTime end = (to != null) ? to : from.plusDays(1);
+
+        return bookingRepository.findAdminBookingsByDate(from, end);
+    }
+
+    @Transactional
+    public void cancelBookingByAdmin(Long bookingId, String reason) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new BookingNotFoundException("Бронь не найдена"));
+
+        switch (booking.getStatus()) {
+            case CANCELLED -> throw new InvalidBookingStateException("Бронь уже отменена");
+            case COMPLETED -> throw new InvalidBookingStateException("Нельзя отменить завершенную бронь");
+            case EXPIRED -> throw new InvalidBookingStateException("Нельзя отменить истекшую бронь");
+            case PENDING_PAYMENT, CONFIRMED -> {
+                booking.setStatus(BookingStatus.CANCELLED);
+                booking.setCancellationReason(reason);
+                bookingRepository.save(booking);
+            }
+        }
     }
 
     private BookingResponse toResponse(Booking booking, ClubTable bookingTable) {
