@@ -68,8 +68,8 @@ app:
     full-name: ${INITIAL_OWNER_FULL_NAME:Owner}
   mobile:
     canonicalUrl: ${MOBILE_CANONICAL_URL:https://www.localhost/events/}
-    #   deep link prefix example - org.example.app://events/
-    deep-link-prefix: ${MOBILE_DEEP_LINK_PREFIX:app://events/}
+    #   deep link prefix example - app://
+    deep-link-prefix: ${MOBILE_DEEP_LINK_PREFIX:app://}
     ios-store: ${MOBILE_IOS_STORE:https://apps.apple.com/app/youtube/id544007664}
     android-store: ${MOBILE_ANDROID_STORE:https://play.google.com/store/apps/details?id=com.google.android.youtube}
   firebase:

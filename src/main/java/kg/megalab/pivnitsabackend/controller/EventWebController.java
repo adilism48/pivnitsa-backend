@@ -39,7 +39,7 @@ public class EventWebController {
         model.addAttribute("title", event.title());
         model.addAttribute("description", event.description());
         model.addAttribute("imageUrl", event.bannerUrl() != null ? event.bannerUrl() : "");
-        model.addAttribute("deepLink", deepLinkPrefix + id);
+        model.addAttribute("deepLink", deepLinkPrefix + "events/" + id);
         model.addAttribute("storeUrl", resolveStoreUrl(userAgent));
         model.addAttribute("canonicalUrl", canonicalUrl + id);
         model.addAttribute("eventFound", true);
