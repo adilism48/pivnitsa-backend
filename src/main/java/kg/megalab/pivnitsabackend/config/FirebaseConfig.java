@@ -40,7 +40,8 @@ public class FirebaseConfig {
             } else {
                 log.warn("Конфигурационный файл Firebase не найден: {}. Запуск продолжается без Firebase.", firebaseResource);
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            log.error("Firebase init failed", e);
         }
         return null;
     }
