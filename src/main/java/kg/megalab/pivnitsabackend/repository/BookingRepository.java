@@ -6,6 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.OffsetDateTime;
+import java.util.List;
+
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("""
@@ -32,4 +35,5 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             """)
     boolean existsActiveBookingByTableId(@Param("tableId") Long tableId);
 
+    List<Booking> findByStatusAndCreatedAtBefore(BookingStatus status, OffsetDateTime threshold);
 }
