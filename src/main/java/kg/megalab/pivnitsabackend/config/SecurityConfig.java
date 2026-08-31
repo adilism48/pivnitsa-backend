@@ -1,10 +1,13 @@
-package kg.megalab.pivnitsabackend.security;
+package kg.megalab.pivnitsabackend.config;
 
+import kg.megalab.pivnitsabackend.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -26,6 +29,11 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .exceptionHandling(exception -> exception
@@ -42,14 +50,32 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/v1/auth/send-otp",
                                 "/api/v1/auth/verify-otp",
+                                "/api/v1/staff/auth/login",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/actuator/**",
                                 "/api/v1/auth/login/send-otp",
                                 "/api/v1/auth/login/verify-otp",
-                                "/error"
+                                "/error",
+                                "/events/**"
                         ).permitAll()
+
+                        // GET Open for non auth user
+                        .requestMatchers(HttpMethod.POST, "/api/v1/staff/manage").hasRole("OWNER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/staff/manage/{id}/financial-access").hasRole("OWNER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/staff/manage/{id}/deactivate").hasAnyRole("STAFF", "OWNER")
+
+                        .requestMatchers(HttpMethod.GET, "/api/v1/tables").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/tables").hasAnyRole("STAFF", "OWNER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/tables/{id}").hasAnyRole("STAFF", "OWNER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/tables/{id}").hasAnyRole("STAFF", "OWNER")
+
+                        .requestMatchers(HttpMethod.POST, "/api/v1/tables/*/unavailability").hasAnyRole("STAFF", "OWNER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/tables/unavailability/*").hasAnyRole("STAFF", "OWNER")
+
+                        .requestMatchers(HttpMethod.GET, "/api/v1/halls").permitAll()
+
 
                         // GET Open for non auth user
                         .requestMatchers(
@@ -57,6 +83,8 @@ public class SecurityConfig {
                                 "/api/v1/events",
                                 "/api/v1/events/**"
                         ).permitAll()
+
+                        .requestMatchers("/api/v1/events", "/api/v1/events/**").hasAnyRole("STAFF", "OWNER")
 
                         .requestMatchers("/api/v1/auth/complete-profile")
                         .hasAnyRole("PRE_AUTH", "FULL_ACCESS")

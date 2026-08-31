@@ -4,19 +4,22 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.OffsetDateTime;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "club_tables")
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class ClubTable {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "hall_id", nullable = false)
+    private Long hallId;
 
     @Column(name = "table_number", nullable = false, unique = true)
     private String tableNumber;
@@ -24,9 +27,21 @@ public class ClubTable {
     @Column(name = "capacity", nullable = false)
     private Integer capacity;
 
-    @Column(name = "active", nullable = false)
     @Builder.Default
+    @Column(name = "active", nullable = false)
     private boolean active = true;
+
+    @Column(name = "position_x", precision = 5, scale = 2)
+    private BigDecimal positionX;
+
+    @Column(name = "position_y", precision = 5, scale = 2)
+    private BigDecimal positionY;
+
+    @Column(name = "category")
+    private String category;
+
+    @Column(name = "deposit_amount")
+    private BigDecimal depositAmount;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;

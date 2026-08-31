@@ -4,6 +4,7 @@ import kg.megalab.pivnitsabackend.dto.booking.BookingResponse;
 import kg.megalab.pivnitsabackend.entity.Booking;
 import kg.megalab.pivnitsabackend.entity.BookingStatus;
 import kg.megalab.pivnitsabackend.entity.ClubTable;
+import kg.megalab.pivnitsabackend.entity.Hall;
 import kg.megalab.pivnitsabackend.entity.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,9 @@ class BookingRepositoryTest {
     @Autowired
     private ClubTableRepository clubTableRepository;
 
+    @Autowired
+    private HallRepository hallRepository;
+
     @Container
     @ServiceConnection
     static PostgreSQLContainer postgres =
@@ -56,8 +60,15 @@ class BookingRepositoryTest {
                         .build()
         );
 
+        Hall hall = hallRepository.save(
+                Hall.builder()
+                        .name("Main hall")
+                        .build()
+        );
+
         ClubTable table = clubTableRepository.save(
                 ClubTable.builder()
+                        .hallId(hall.getId())
                         .tableNumber("A-5")
                         .capacity(4)
                         .active(true)

@@ -1,9 +1,22 @@
 package kg.megalab.pivnitsabackend.repository;
 
 import kg.megalab.pivnitsabackend.entity.ClubTable;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ClubTableRepository extends JpaRepository<ClubTable, Long> {
+    Optional<ClubTable> findByTableNumber(String tableNumber);
+
+    List<ClubTable> findByHallId(Long hallId);
+
+    List<ClubTable> findByActive(boolean active);
+
+    List<ClubTable> findByPositionX(BigDecimal positionX);
+
+    List<ClubTable> findByPositionY(BigDecimal positionY);
 }

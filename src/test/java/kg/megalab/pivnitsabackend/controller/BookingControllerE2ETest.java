@@ -3,9 +3,11 @@ package kg.megalab.pivnitsabackend.controller;
 import kg.megalab.pivnitsabackend.entity.Booking;
 import kg.megalab.pivnitsabackend.entity.BookingStatus;
 import kg.megalab.pivnitsabackend.entity.ClubTable;
+import kg.megalab.pivnitsabackend.entity.Hall;
 import kg.megalab.pivnitsabackend.entity.User;
 import kg.megalab.pivnitsabackend.repository.BookingRepository;
 import kg.megalab.pivnitsabackend.repository.ClubTableRepository;
+import kg.megalab.pivnitsabackend.repository.HallRepository;
 import kg.megalab.pivnitsabackend.repository.UserRepository;
 import kg.megalab.pivnitsabackend.security.JwtService;
 import org.junit.jupiter.api.Test;
@@ -55,6 +57,9 @@ class BookingControllerE2ETest {
     private ClubTableRepository clubTableRepository;
 
     @Autowired
+    private HallRepository hallRepository;
+
+    @Autowired
     private BookingRepository bookingRepository;
 
     @Autowired
@@ -78,8 +83,15 @@ class BookingControllerE2ETest {
                         .build()
         );
 
+        Hall hall = hallRepository.saveAndFlush(
+                Hall.builder()
+                        .name("Main hall")
+                        .build()
+        );
+
         ClubTable table = clubTableRepository.saveAndFlush(
                 ClubTable.builder()
+                        .hallId(hall.getId())
                         .tableNumber("A-5")
                         .capacity(4)
                         .active(true)

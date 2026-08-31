@@ -1,0 +1,71 @@
+name: VPS CD
+
+on:
+  push:
+    branches: ["develop"]
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Make mvnw executable
+        run: chmod +x ./mvnw
+
+      - name: Build and Test with Maven
+        run: ./mvnw clean verify
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to ARM VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -euo pipefail
+            cd /opt/app
+            
+            if [ ! -d ".git" ]; then
+              git init
+              git remote add origin https://github.com/${{ github.repository }}.git
+            fi
+
+            git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+            git fetch origin ${{ github.ref_name }}
+            git remote set-url origin https://github.com/${{ github.repository }}.git
+
+            git checkout -B ${{ github.ref_name }} origin/${{ github.ref_name }}
+
+            docker compose up -d --build
+
+            sleep 5
+            if [ -n "$(docker compose ps -q --status exited)" ] || [ -n "$(docker compose ps -q --status dead)" ]; then
+              echo "::error::One or more containers failed to start"
+              docker compose logs --tail=100
+              exit 1
+            fi
+
+            if ! curl -fsS --retry 20 --retry-delay 5 --retry-connrefused --retry-all-errors --max-time 5 http://localhost:8080/actuator/health > /dev/null; then
+              echo "::error::Health check failed"
+              docker compose logs --tail=100
+              exit 1
+            fi
+
+            docker image prune -f

@@ -5,6 +5,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import kg.megalab.pivnitsabackend.entity.Staff;
+import kg.megalab.pivnitsabackend.repository.StaffRepository;
 import kg.megalab.pivnitsabackend.exception.InvalidTokenException;
 import kg.megalab.pivnitsabackend.exception.TokenBlacklistUnavailableException;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final TokenBlacklistService tokenBlacklistService;
     private final HandlerExceptionResolver handlerExceptionResolver;
+    private final StaffRepository staffRepository;
 
     @Override
     protected void doFilterInternal(
@@ -52,6 +55,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             final String jti = jwtService.extractJti(token);
             final String phone = jwtService.extractPhone(token);
             final String scope = jwtService.extractScope(token);
+
+            if (scope.equals("STAFF") || scope.equals("OWNER")) {
+                boolean stillActive = staffRepository.findByEmail(phone)
+                        .map(Staff::isActive)
+                        .orElse(false);
+
+                if (!stillActive) {
+                    throw new InvalidTokenException("Аккаунт деактивирован");
+                }
+            }
 
             if (phone != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 

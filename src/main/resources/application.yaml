@@ -1,4 +1,5 @@
 server:
+  forward-headers-strategy: framework
   port: ${PORT:8080}
 
 spring:
@@ -61,3 +62,24 @@ app:
     secret-key: ${S3_SECRET_KEY:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
     endpoint: ${S3_ENDPOINT:http://garage_s3:3900}
     public-url: ${S3_PUBLIC_URL:http://pivnitsa-media-local.localhost:3902}
+  initial-owner:
+    email: ${INITIAL_OWNER_EMAIL:}
+    password: ${INITIAL_OWNER_PASSWORD:}
+    full-name: ${INITIAL_OWNER_FULL_NAME:Owner}
+  mobile:
+    canonicalUrl: ${MOBILE_CANONICAL_URL:https://www.localhost/events/}
+    #   deep link prefix example - app://
+    deep-link-prefix: ${MOBILE_DEEP_LINK_PREFIX:app://}
+    ios-store: ${MOBILE_IOS_STORE:https://apps.apple.com/app/youtube/id544007664}
+    android-store: ${MOBILE_ANDROID_STORE:https://play.google.com/store/apps/details?id=com.google.android.youtube}
+  firebase:
+    config-path: ${FIREBASE_CONFIG_PATH:classpath:firebase-service-account.json}
+  notifications:
+    booking-reminder:
+      enabled: ${BOOKING_REMINDER_ENABLED:true}
+      advance: ${BOOKING_REMINDER_ADVANCE:24h}
+      lookback: ${BOOKING_REMINDER_LOOKBACK:5m}
+      lookahead: ${BOOKING_REMINDER_LOOKAHEAD:5m}
+      fixed-delay: ${BOOKING_REMINDER_FIXED_DELAY:5m}
+      initial-delay: ${BOOKING_REMINDER_INITIAL_DELAY:1m}
+      timezone: ${BOOKING_REMINDER_TIMEZONE:Asia/Bishkek}
