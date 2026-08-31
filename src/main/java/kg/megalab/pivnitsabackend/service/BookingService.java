@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 
-@Component
 @Service
 @RequiredArgsConstructor
 public class BookingService {
@@ -35,7 +34,7 @@ public class BookingService {
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
 
         if (request.bookingAt().isAfter(OffsetDateTime.now().plusDays(MAX_BOOKING_DAY))) {
-            throw new InvalidBookingDataException("Дата брони не может быть более чем 30 дней");
+            throw new InvalidBookingDataException("Дата брони не может быть более чем через 30 дней");
         }
 
         ClubTable bookingTable = clubTableRepository.findById(request.clubTableId())
@@ -61,19 +60,22 @@ public class BookingService {
 
             booking = bookingRepository.save(booking);
 
-            return toResponse(booking);
+            return toResponse(booking, bookingTable);
+
         } catch (DataIntegrityViolationException e) {
             throw new TableNotAvailableException("Столик уже забронирован");
         }
 
     }
 
-    private BookingResponse toResponse(Booking booking) {
+    private BookingResponse toResponse(Booking booking, ClubTable bookingTable) {
         return new BookingResponse(
                 booking.getId(),
                 booking.getClubTableId(),
+                bookingTable.getTableNumber(),
                 booking.getEventId(),
                 booking.getBookingAt(),
+                booking.getCreatedAt(),
                 booking.getStatus(),
                 booking.getAmount(),
                 booking.getGuestsCount()
