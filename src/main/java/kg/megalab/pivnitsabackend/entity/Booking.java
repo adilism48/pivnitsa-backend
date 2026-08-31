@@ -38,6 +38,10 @@ public class Booking {
     @Column(name = "amount", nullable = false)
     private BigDecimal amount;
 
+    @Builder.Default
+    @Column(name = "guests_count", nullable = false)
+    private Integer guestsCount = 1;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 

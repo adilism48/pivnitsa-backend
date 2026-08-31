@@ -37,10 +37,11 @@ public class FirebaseConfig {
                     log.info("FirebaseApp успешно инициализирован из: {}", firebaseResource.getDescription());
                     return FirebaseApp.initializeApp(options);
                 }
-            } else{
+            } else {
                 log.warn("Конфигурационный файл Firebase не найден: {}. Запуск продолжается без Firebase.", firebaseResource);
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            log.error("Firebase init failed", e);
         }
         return null;
     }
