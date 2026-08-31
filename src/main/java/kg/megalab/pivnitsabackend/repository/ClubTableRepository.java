@@ -15,8 +15,4 @@ public interface ClubTableRepository extends JpaRepository<ClubTable, Long> {
     List<ClubTable> findByHallId(Long hallId);
 
     List<ClubTable> findByActive(boolean active);
-
-    List<ClubTable> findByPositionX(BigDecimal positionX);
-
-    List<ClubTable> findByPositionY(BigDecimal positionY);
 }

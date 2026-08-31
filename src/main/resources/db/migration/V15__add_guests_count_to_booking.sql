@@ -1,0 +1,2 @@
+ALTER TABLE bookings
+    ADD COLUMN guests_count INTEGER NOT NULL DEFAULT 1;
