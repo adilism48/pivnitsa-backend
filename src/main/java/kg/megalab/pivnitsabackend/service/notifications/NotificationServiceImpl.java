@@ -103,6 +103,69 @@ public class NotificationServiceImpl implements NotificationService{
             return;
         }
 
+        validateCreationRequest(
+                type,
+                title,
+                body,
+                targetType,
+                targetId,
+                deduplicationKey
+        );
+
+        userIds.stream()
+                .filter(Objects::nonNull)
+                .distinct()
+                .forEach(userId -> insertIfAbsent(
+                        userId,
+                        type,
+                        title,
+                        body,
+                        targetType,
+                        targetId,
+                        deduplicationKey
+                ));
+    }
+
+    @Override
+    @Transactional
+    public boolean createForUser(
+            Long userId,
+            NotificationType type,
+            String title,
+            String body,
+            NotificationTargetType targetType,
+            Long targetId,
+            String deduplicationKey
+    ) {
+        Objects.requireNonNull(userId, "User ID is required");
+        validateCreationRequest(
+                type,
+                title,
+                body,
+                targetType,
+                targetId,
+                deduplicationKey
+        );
+
+        return insertIfAbsent(
+                userId,
+                type,
+                title,
+                body,
+                targetType,
+                targetId,
+                deduplicationKey
+        ) == 1;
+    }
+
+    private void validateCreationRequest(
+            NotificationType type,
+            String title,
+            String body,
+            NotificationTargetType targetType,
+            Long targetId,
+            String deduplicationKey
+    ) {
         Objects.requireNonNull(type, "Notification type is required");
         Objects.requireNonNull(title, "Notification title is required");
         Objects.requireNonNull(body, "Notification body is required");
@@ -119,25 +182,29 @@ public class NotificationServiceImpl implements NotificationService{
                     "Target type and target ID must be provided together"
             );
         }
+    }
 
+    private int insertIfAbsent(
+            Long userId,
+            NotificationType type,
+            String title,
+            String body,
+            NotificationTargetType targetType,
+            Long targetId,
+            String deduplicationKey
+    ) {
         String targetTypeValue =
                 targetType == null ? null : targetType.name();
 
-        userIds.stream()
-                .filter(Objects::nonNull)
-                .distinct()
-                .forEach(userId ->
-                        notificationRepository.insertIfAbsent(
-                                userId,
-                                type.name(),
-                                title,
-                                body,
-                                targetTypeValue,
-                                targetId,
-                                deduplicationKey
-                        )
-                );
-
+        return notificationRepository.insertIfAbsent(
+                userId,
+                type.name(),
+                title,
+                body,
+                targetTypeValue,
+                targetId,
+                deduplicationKey
+        );
     }
 
     private User getVerifiedUser(String phone){

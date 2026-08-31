@@ -74,3 +74,12 @@ app:
     android-store: ${MOBILE_ANDROID_STORE:https://play.google.com/store/apps/details?id=com.google.android.youtube}
   firebase:
     config-path: ${FIREBASE_CONFIG_PATH:classpath:firebase-service-account.json}
+  notifications:
+    booking-reminder:
+      enabled: ${BOOKING_REMINDER_ENABLED:true}
+      advance: ${BOOKING_REMINDER_ADVANCE:24h}
+      lookback: ${BOOKING_REMINDER_LOOKBACK:5m}
+      lookahead: ${BOOKING_REMINDER_LOOKAHEAD:5m}
+      fixed-delay: ${BOOKING_REMINDER_FIXED_DELAY:5m}
+      initial-delay: ${BOOKING_REMINDER_INITIAL_DELAY:1m}
+      timezone: ${BOOKING_REMINDER_TIMEZONE:Asia/Bishkek}

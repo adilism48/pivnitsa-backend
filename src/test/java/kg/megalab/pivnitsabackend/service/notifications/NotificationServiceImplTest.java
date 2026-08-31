@@ -162,6 +162,56 @@ class NotificationServiceImplTest {
         );
     }
 
+    @Test
+    void shouldReportWhetherNotificationWasCreated() {
+        when(notificationRepository.insertIfAbsent(
+                USER_ID,
+                "BOOKING_REMINDER",
+                "Booking reminder",
+                "Table 7",
+                "BOOKING",
+                145L,
+                "BOOKING_REMINDER:145"
+        )).thenReturn(1);
+
+        boolean created = notificationService.createForUser(
+                USER_ID,
+                NotificationType.BOOKING_REMINDER,
+                "Booking reminder",
+                "Table 7",
+                NotificationTargetType.BOOKING,
+                145L,
+                "BOOKING_REMINDER:145"
+        );
+
+        assertTrue(created);
+    }
+
+    @Test
+    void shouldReportDuplicateNotification() {
+        when(notificationRepository.insertIfAbsent(
+                USER_ID,
+                "BOOKING_REMINDER",
+                "Booking reminder",
+                "Table 7",
+                "BOOKING",
+                145L,
+                "BOOKING_REMINDER:145"
+        )).thenReturn(0);
+
+        boolean created = notificationService.createForUser(
+                USER_ID,
+                NotificationType.BOOKING_REMINDER,
+                "Booking reminder",
+                "Table 7",
+                NotificationTargetType.BOOKING,
+                145L,
+                "BOOKING_REMINDER:145"
+        );
+
+        assertFalse(created);
+    }
+
     private void verifyInsert(Long userId) {
         verify(notificationRepository).insertIfAbsent(
                 userId,

@@ -15,7 +15,10 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.util.List;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = "app.notifications.booking-reminder.enabled=false"
+)
 @AutoConfigureMockMvc
 public abstract class BaseIntegrationTest {
 

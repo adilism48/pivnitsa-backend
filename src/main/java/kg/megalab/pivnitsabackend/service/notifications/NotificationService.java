@@ -26,5 +26,14 @@ public interface NotificationService {
             String deduplicationKey
     );
 
+    boolean createForUser(
+            Long userId,
+            NotificationType type,
+            String title,
+            String body,
+            NotificationTargetType targetType,
+            Long targetId,
+            String deduplicationKey
+    );
 
 }
