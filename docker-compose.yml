@@ -112,7 +112,7 @@ services:
       INITIAL_OWNER_PASSWORD: ${INITIAL_OWNER_PASSWORD:-ChangeMe123}
       INITIAL_OWNER_FULL_NAME: ${INITIAL_OWNER_FULL_NAME:-Владелец}
       MOBILE_CANONICAL_URL: ${MOBILE_CANONICAL_URL:-https://localhost/events/}
-      MOBILE_DEEP_LINK_PREFIX: ${MOBILE_DEEP_LINK_PREFIX:-app://events/}
+      MOBILE_DEEP_LINK_PREFIX: ${MOBILE_DEEP_LINK_PREFIX:-app://}
       MOBILE_IOS_STORE: ${MOBILE_IOS_STORE:-https://apps.apple.com/app/youtube/id544007664}
       MOBILE_ANDROID_STORE: ${MOBILE_ANDROID_STORE:-https://play.google.com/store/apps/details?id=com.google.android.youtube}
       FIREBASE_CONFIG_PATH: file:/app/secrets/firebase-service-account.json
