@@ -1,5 +1,6 @@
 package kg.megalab.pivnitsabackend.repository;
 
+import kg.megalab.pivnitsabackend.dto.admin.AdminBookingResponse;
 import kg.megalab.pivnitsabackend.entity.Booking;
 import kg.megalab.pivnitsabackend.entity.BookingStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -36,4 +37,31 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     boolean existsActiveBookingByTableId(@Param("tableId") Long tableId);
 
     List<Booking> findByStatusAndCreatedAtBefore(BookingStatus status, OffsetDateTime threshold);
+
+    @Query("""
+    SELECT new kg.megalab.pivnitsabackend.dto.admin.AdminBookingResponse(
+        b.id,
+        t.tableNumber,
+        b.bookingAt,
+        u.firstName,
+        u.lastName,
+        u.phone,
+        b.guestsCount,
+        b.amount,
+        b.status,
+        p.status,
+        b.cancellationReason
+    )
+    FROM Booking b
+    JOIN ClubTable t ON t.id = b.clubTableId
+    JOIN User u ON u.id = b.userId
+    LEFT JOIN Payment p ON p.bookingId = b.id
+       AND p.id = (SELECT MAX(p2.id) FROM Payment p2 WHERE p2.bookingId = b.id)
+    WHERE b.bookingAt >= :startOfDay AND b.bookingAt < :endOfDay
+    ORDER BY b.bookingAt ASC
+    """)
+    List<AdminBookingResponse> findAdminBookingsByDate(
+            @Param("startOfDay") OffsetDateTime startOfDay,
+            @Param("endOfDay") OffsetDateTime endOfDay
+    );
 }
