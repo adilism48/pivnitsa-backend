@@ -552,6 +552,119 @@ DELETE /api/v1/devices/tokens?token=fcm-device-token
 
 По нажатию на push мобильное приложение читает type/eventId из data и открывает карточку мероприятия с этим id.
 
+### US-32 — Создание и публикация мероприятий (админ)
+
+Создание, редактирование, удаление и публикация мероприятий администратором. Создание и редактирование выполняются как `multipart/form-data` с полями `title`, `description`, `status`, `startsAt`, `endsAt` и `file` (баннер).
+
+Нельзя создать мероприятие сразу со статусом `ARCHIVED`.
+
+```http
+POST /api/v1/admin/events
+Content-Type: multipart/form-data
+```
+
+Успешный ответ — 201 Created:
+```json
+{
+  "id": 1,
+  "title": "Example event",
+  "description": "Example event description",
+  "bannerUrl": "https://media.example.com/banners/image.png",
+  "status": "PUBLISHED",
+  "canonicalUrl": "https://example.com/events/1",
+  "startsAt": "2026-09-03T09:04:16.596Z",
+  "endsAt": "2026-09-04T09:04:16.596Z",
+  "createdAt": "2026-09-02T09:04:16.596Z",
+  "updatedAt": "2026-09-02T09:04:16.596Z"
+}
+```
+
+#### Редактирование мероприятия
+
+Поля обновляются частично — если поле не передано, оно остаётся без изменений. Файл баннера передавать не обязательно: если новый файл не прикреплён, текущий баннер сохраняется.
+
+Редактирование архивированного мероприятия (`status = ARCHIVED`) запрещено.
+
+```http
+PUT /api/v1/admin/events/{id}
+Content-Type: multipart/form-data
+```
+
+Успешный ответ — 200 OK:
+```json
+{
+  "id": 1,
+  "title": "Example event",
+  "description": "Example event description",
+  "bannerUrl": "https://media.example.com/banners/image.png",
+  "status": "PUBLISHED",
+  "canonicalUrl": "https://example.com/events/1",
+  "startsAt": "2026-09-03T09:04:16.596Z",
+  "endsAt": "2026-09-04T09:04:16.596Z",
+  "createdAt": "2026-09-02T09:04:16.596Z",
+  "updatedAt": "2026-09-02T09:04:16.596Z"
+}
+```
+
+#### Удаление мероприятия
+
+Удаляет мероприятие и связанный с ним баннер.
+
+```http
+DELETE /api/v1/admin/events/{id}
+```
+
+Успешный ответ — 204 No content
+
+#### Публикация мероприятия
+
+Переводит мероприятие из статуса `DRAFT` в `PUBLISHED`.
+
+```http
+PATCH /api/v1/admin/events/{id}/publish
+```
+
+Успешный ответ — 200 OK
+
+### US-33 — Список бронирований для администратора
+
+Возвращает список бронирований за указанный период времени для административной панели с информацией о клиенте, столике, статусе бронирования и статусе оплаты.
+
+Выборка осуществляется в интервале `from=...`&`to=...`. Если параметр `to` не передан, он автоматически устанавливается как `from + 24 часа`
+```http
+GET /api/v1/admin/bookings?from=2026-08-25T00:00:00%2B06:00
+```
+
+Успешный ответ — 200 OK:
+```json
+{
+  "id": 1,
+  "tableNumber": "T-1",
+  "bookingAt": "2026-08-25T19:00:00+06:00",
+  "firstName": "Jane",
+  "lastName": "Doe",
+  "guestPhone": "+996500112233",
+  "guestsCount": 4,
+  "amount": 1500.00,
+  "bookingStatus": "CONFIRMED",
+  "paymentStatus": "SUCCEEDED",
+  "cancellationReason": null
+}
+```
+
+#### Отмена брони с указанием причины.
+
+```http
+PATCH /api/v1/admin/bookings/{id}/cancel
+```
+```json
+{
+  "reason": "string"
+}
+```
+
+Успешный ответ — 204 No content
+
 ## База данных
 
 В локальном окружении используется PostgreSQL 17. Схема создаётся автоматически
