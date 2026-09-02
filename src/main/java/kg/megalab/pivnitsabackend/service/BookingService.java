@@ -13,29 +13,24 @@ import kg.megalab.pivnitsabackend.repository.ClubTableRepository;
 import kg.megalab.pivnitsabackend.dto.booking.*;
 
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.OffsetDateTime;
 
 @Service
 @RequiredArgsConstructor
 public class BookingService {
     private final BookingRepository bookingRepository;
     private final ClubTableRepository clubTableRepository;
-    private static final long MAX_BOOKING_DAY = 30;
     private final UserRepository userRepository;
+    private final BookingDateValidator bookingDateValidator;
 
     @Transactional
     public BookingResponse createBooking(String phone, CreateBookingRequest request) {
         User user = userRepository.findByPhone(phone)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
 
-        if (request.bookingAt().isAfter(OffsetDateTime.now().plusDays(MAX_BOOKING_DAY))) {
-            throw new InvalidBookingDataException("Дата брони не может быть более чем через 30 дней");
-        }
+        bookingDateValidator.validateBookingDate(request.bookingAt());
 
         ClubTable bookingTable = clubTableRepository.findById(request.clubTableId())
                 .orElseThrow(() -> new TableNotFoundException("Столик не найден"));
