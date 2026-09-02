@@ -1,6 +1,6 @@
 package kg.megalab.pivnitsabackend.service;
 
-import kg.megalab.pivnitsabackend.dto.event.CreateEventRequest;
+import kg.megalab.pivnitsabackend.dto.admin.CreateEventRequest;
 import kg.megalab.pivnitsabackend.dto.event.EventPageResponse;
 import kg.megalab.pivnitsabackend.dto.notification.EventPublishedEvent;
 import kg.megalab.pivnitsabackend.entity.Event;

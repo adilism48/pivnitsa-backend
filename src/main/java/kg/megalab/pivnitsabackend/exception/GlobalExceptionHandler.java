@@ -469,4 +469,19 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(errorResponse);
     }
+
+    @ExceptionHandler(InvalidEventStatusException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidEventStatus(InvalidEventStatusException ex, HttpServletRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                OffsetDateTime.now(ZoneOffset.UTC),
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(errorResponse);
+    }
 }

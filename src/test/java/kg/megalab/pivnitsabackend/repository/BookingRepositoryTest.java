@@ -1,7 +1,6 @@
 package kg.megalab.pivnitsabackend.repository;
 
 import kg.megalab.pivnitsabackend.dto.admin.AdminBookingResponse;
-import kg.megalab.pivnitsabackend.dto.booking.BookingResponse;
 import kg.megalab.pivnitsabackend.entity.Booking;
 import kg.megalab.pivnitsabackend.entity.BookingStatus;
 import kg.megalab.pivnitsabackend.entity.ClubTable;
