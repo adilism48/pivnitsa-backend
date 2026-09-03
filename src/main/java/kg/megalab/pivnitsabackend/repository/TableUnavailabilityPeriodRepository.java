@@ -19,4 +19,17 @@ public interface TableUnavailabilityPeriodRepository extends JpaRepository<Table
                         AND tup.endsAt >= :startOfDay
             """)
     List<Long> findClubTableIdsWithUnavailabilityPeriod(@Param("startOfDay") OffsetDateTime startOfDay, @Param("endOfDay") OffsetDateTime endOfDay);
+
+    @Query("""
+            SELECT COUNT(tup) > 0
+            FROM TableUnavailabilityPeriod tup
+            WHERE tup.clubTableId = :tableId
+              AND tup.startsAt <= :endOfDay
+              AND tup.endsAt >= :startOfDay
+            """)
+    boolean existsUnavailabilityPeriodForTable(
+            @Param("tableId") Long tableId,
+            @Param("startOfDay") OffsetDateTime startOfDay,
+            @Param("endOfDay") OffsetDateTime endOfDay
+    );
 }
