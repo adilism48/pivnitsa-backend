@@ -3,11 +3,9 @@ package kg.megalab.pivnitsabackend.controller;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import kg.megalab.pivnitsabackend.config.OpenApiConfig;
-import kg.megalab.pivnitsabackend.dto.admin.AdminBookingResponse;
-import kg.megalab.pivnitsabackend.dto.admin.CancelBookingRequest;
-import kg.megalab.pivnitsabackend.dto.admin.CreateEventRequest;
+import kg.megalab.pivnitsabackend.dto.admin.*;
 import kg.megalab.pivnitsabackend.dto.event.EventResponse;
-import kg.megalab.pivnitsabackend.dto.admin.UpdateEventRequest;
+import kg.megalab.pivnitsabackend.service.BookingReportService;
 import kg.megalab.pivnitsabackend.service.BookingService;
 import kg.megalab.pivnitsabackend.service.EventService;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +26,7 @@ import java.util.List;
 public class AdminController {
 
     private final BookingService bookingService;
+    private final BookingReportService bookingReportService;
     private final EventService eventService;
 
     @GetMapping("/bookings")
@@ -36,6 +35,15 @@ public class AdminController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime to
     ) {
         return ResponseEntity.ok(bookingService.getAdminBookings(from, to));
+    }
+
+    @GetMapping("/bookings/report")
+    public ResponseEntity<BookingReportResponse> getOwnerReport(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime endDate
+    ) {
+        BookingReportResponse report = bookingReportService.getOwnerReport(startDate, endDate);
+        return ResponseEntity.ok(report);
     }
 
     @PatchMapping("/bookings/{id}/cancel")
