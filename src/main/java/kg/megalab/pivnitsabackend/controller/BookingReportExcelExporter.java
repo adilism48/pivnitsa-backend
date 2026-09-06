@@ -65,7 +65,7 @@ public class BookingReportExcelExporter {
             rowCancelled.createCell(0).setCellValue("Всего отмен:");
             rowCancelled.createCell(1).setCellValue(summary.totalCancellations());
 
-            currentRow++; // Разделительный пустой ряд
+            currentRow++;
 
             // Items header
             Row tableHeader = sheet.createRow(currentRow++);
