@@ -192,7 +192,7 @@ class BookingRepositoryTest {
     }
 
     @Test
-    @DisplayName("US-35: Должен фильтровать по createdAt и игнорировать старые брони")
+    @DisplayName("Должен фильтровать по createdAt и игнорировать старые брони")
     void shouldIgnoreBookingsOutsideCreatedAtRange() {
         // ARRANGE
         Booking oldBooking = createBooking(now, BookingStatus.CONFIRMED, "1000.00");
