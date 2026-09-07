@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class BookingService {
@@ -24,6 +26,7 @@ public class BookingService {
     private final ClubTableRepository clubTableRepository;
     private final UserRepository userRepository;
     private final BookingDateValidator bookingDateValidator;
+    private final TableUnavailabilityChecker unavailabilityChecker;
 
     @Transactional
     public BookingResponse createBooking(String phone, CreateBookingRequest request) {
@@ -34,6 +37,11 @@ public class BookingService {
 
         ClubTable bookingTable = clubTableRepository.findById(request.clubTableId())
                 .orElseThrow(() -> new TableNotFoundException("Столик не найден"));
+
+        OffsetDateTime[] range = unavailabilityChecker.toDayRange(request.bookingAt().toLocalDate());
+        if (unavailabilityChecker.isUnavailable(bookingTable, range[0], range[1])) {
+            throw new TableUnavailableException("Столик недоступен на выбранную дату");
+        }
 
         if (bookingTable.getDepositAmount() == null) {
             throw new DepositNotConfiguredException("Нету данных о депозите");
@@ -60,7 +68,6 @@ public class BookingService {
         } catch (DataIntegrityViolationException e) {
             throw new TableNotAvailableException("Столик уже забронирован");
         }
-
     }
 
     private BookingResponse toResponse(Booking booking, ClubTable bookingTable) {

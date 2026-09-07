@@ -10,12 +10,20 @@ import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 
 @Service
 @RequiredArgsConstructor
 public class TableUnavailabilityChecker {
     private final ClubTableRepository clubTableRepository;
     private final TableUnavailabilityPeriodRepository tableUnavailabilityPeriodRepository;
+
+    public OffsetDateTime[] toDayRange(LocalDate date) {
+        OffsetDateTime startOfDay = date.atStartOfDay().atOffset(ZoneOffset.UTC);
+        OffsetDateTime endOfDay = startOfDay.plusDays(1);
+        return new OffsetDateTime[]{startOfDay, endOfDay};
+    }
 
     public Set<Long> findUnavailableTableIds(OffsetDateTime startOfDay, OffsetDateTime endOfDay) {
         List<ClubTable> inactiveTables = clubTableRepository.findByActive(false);

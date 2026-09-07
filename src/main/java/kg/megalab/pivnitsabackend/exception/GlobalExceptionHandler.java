@@ -1,10 +1,7 @@
 package kg.megalab.pivnitsabackend.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
-import kg.megalab.pivnitsabackend.exception.booking.DepositNotConfiguredException;
-import kg.megalab.pivnitsabackend.exception.booking.GuestsExceedCapacityException;
-import kg.megalab.pivnitsabackend.exception.booking.InvalidBookingDataException;
-import kg.megalab.pivnitsabackend.exception.booking.TableNotAvailableException;
+import kg.megalab.pivnitsabackend.exception.booking.*;
 import kg.megalab.pivnitsabackend.exception.hall.HallNotFoundException;
 import kg.megalab.pivnitsabackend.exception.otpexceptions.InvalidOtpException;
 import kg.megalab.pivnitsabackend.exception.otpexceptions.OtpAlreadySentException;
@@ -25,6 +22,18 @@ import java.time.ZoneOffset;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(TableUnavailableException.class)
+    public ResponseEntity<ErrorResponse> handleTableUnavailable(TableUnavailableException ex, HttpServletRequest request) {
+        ErrorResponse response = new ErrorResponse(
+                OffsetDateTime.now(ZoneOffset.UTC),
+                HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
 
     @ExceptionHandler(GuestsExceedCapacityException.class)
     public ResponseEntity<ErrorResponse> handleGuestsExceedCapacity(GuestsExceedCapacityException ex, HttpServletRequest request) {
