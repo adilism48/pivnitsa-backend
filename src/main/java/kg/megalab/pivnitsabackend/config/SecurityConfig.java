@@ -60,6 +60,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/staff/manage/{id}/deactivate").hasAnyRole("STAFF", "OWNER")
 
                         .requestMatchers(HttpMethod.GET, "/api/v1/tables").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/tables/status").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/tables").hasAnyRole("STAFF", "OWNER")
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/tables/{id}").hasAnyRole("STAFF", "OWNER")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/tables/{id}").hasAnyRole("STAFF", "OWNER")
