@@ -44,4 +44,18 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Long> findClubTableIdsWithActiveBookingOnDate(@Param("startOfDay") OffsetDateTime startOfDay, @Param("endOfDay") OffsetDateTime endOfDay);
 
     List<Booking> findByStatusAndCreatedAtBefore(BookingStatus status, OffsetDateTime threshold);
+
+    @Query("""
+            SELECT COUNT(b) > 0
+            FROM Booking b
+            WHERE b.clubTableId = :tableId
+              AND b.status IN (kg.megalab.pivnitsabackend.entity.BookingStatus.CONFIRMED,
+                                kg.megalab.pivnitsabackend.entity.BookingStatus.PENDING_PAYMENT)
+              AND b.bookingAt >= :startOfDay AND b.bookingAt < :endOfDay
+            """)
+    boolean existsActiveBookingForTableOnDate(
+            @Param("tableId") Long tableId,
+            @Param("startOfDay") OffsetDateTime startOfDay,
+            @Param("endOfDay") OffsetDateTime endOfDay
+    );
 }

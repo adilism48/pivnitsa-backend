@@ -54,6 +54,10 @@ public class BookingService {
             throw new GuestsExceedCapacityException("Превышено допустимое число гостей");
         }
 
+        if (bookingRepository.existsActiveBookingForTableOnDate(bookingTable.getId(), range[0], range[1])) {
+            throw new TableNotAvailableException("Столик уже забронирован на эту дату");
+        }
+
         try {
             Booking booking = Booking.builder()
                     .userId(user.getId())
