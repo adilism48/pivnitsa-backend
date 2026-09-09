@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 @Service
@@ -29,20 +30,26 @@ import java.util.List;
 public class BookingService {
     private final BookingRepository bookingRepository;
     private final ClubTableRepository clubTableRepository;
-    private static final long MAX_BOOKING_DAY = 30;
     private final UserRepository userRepository;
+    private final BookingDateValidator bookingDateValidator;
+    private final TableUnavailabilityChecker unavailabilityChecker;
 
     @Transactional
     public BookingResponse createBooking(String phone, CreateBookingRequest request) {
         User user = userRepository.findByPhone(phone)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
 
-        if (request.bookingAt().isAfter(OffsetDateTime.now().plusDays(MAX_BOOKING_DAY))) {
-            throw new InvalidBookingDataException("Дата брони не может быть более чем через 30 дней");
-        }
+        bookingDateValidator.validateBookingDate(request.bookingAt());
 
         ClubTable bookingTable = clubTableRepository.findById(request.clubTableId())
                 .orElseThrow(() -> new TableNotFoundException("Столик не найден"));
+
+        OffsetDateTime bishkekBookingAt = request.bookingAt().withOffsetSameInstant(ZoneOffset.of("+06:00"));
+        OffsetDateTime[] range = unavailabilityChecker.toDayRange(bishkekBookingAt.toLocalDate());
+
+        if (unavailabilityChecker.isUnavailable(bookingTable, range[0], range[1])) {
+            throw new TableUnavailableException("Столик недоступен на выбранную дату");
+        }
 
         if (bookingTable.getDepositAmount() == null) {
             throw new DepositNotConfiguredException("Нету данных о депозите");
@@ -50,6 +57,10 @@ public class BookingService {
 
         if (bookingTable.getCapacity() < request.guestsCount()) {
             throw new GuestsExceedCapacityException("Превышено допустимое число гостей");
+        }
+
+        if (bookingRepository.existsActiveBookingForTableOnDate(bookingTable.getId(), range[0], range[1])) {
+            throw new TableNotAvailableException("Столик уже забронирован на эту дату");
         }
 
         try {
@@ -69,7 +80,6 @@ public class BookingService {
         } catch (DataIntegrityViolationException e) {
             throw new TableNotAvailableException("Столик уже забронирован");
         }
-
     }
 
     @Transactional(readOnly = true)
