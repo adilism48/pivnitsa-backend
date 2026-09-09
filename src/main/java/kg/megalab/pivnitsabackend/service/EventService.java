@@ -1,10 +1,13 @@
 package kg.megalab.pivnitsabackend.service;
 
+import kg.megalab.pivnitsabackend.dto.admin.CreateEventRequest;
+import kg.megalab.pivnitsabackend.dto.admin.UpdateEventRequest;
 import kg.megalab.pivnitsabackend.dto.event.*;
 import kg.megalab.pivnitsabackend.dto.notification.EventPublishedEvent;
 import kg.megalab.pivnitsabackend.entity.Event;
 import kg.megalab.pivnitsabackend.entity.EventStatus;
 import kg.megalab.pivnitsabackend.exception.EventNotFoundException;
+import kg.megalab.pivnitsabackend.exception.InvalidEventStatusException;
 import kg.megalab.pivnitsabackend.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,6 +61,9 @@ public class EventService {
 
     public EventResponse create(CreateEventRequest request) {
 
+        if (request.status() == EventStatus.ARCHIVED)
+            throw new InvalidEventStatusException("Нельзя создать архивированное мероприятие");
+
         String bannerUrl = s3FileStorageService.upload(request.file(), "banners");
 
         try {
@@ -95,19 +101,26 @@ public class EventService {
     }
 
     public EventResponse update(Long id, UpdateEventRequest request) {
-        String newBannerUrl = null;
-        boolean hasNewFile = request.file() != null && !request.file().isEmpty();
 
-        if (hasNewFile) {
-            newBannerUrl = s3FileStorageService.upload(request.file(), "banners");
+        Event initialEvent = getEvent(id);
+        if (initialEvent.getStatus() == EventStatus.ARCHIVED) {
+            throw new InvalidEventStatusException("Нельзя редактировать архивированное мероприятие");
         }
 
-        final String uploadedBannerUrl = newBannerUrl;
+        boolean hasNewFile = request.file() != null && !request.file().isEmpty();
+        String newBannerUrl = hasNewFile
+                ? s3FileStorageService.upload(request.file(), "banners")
+                : null;
+
         final String[] oldBannerUrlHolder = new String[1];
 
         try {
             Event updatedEvent = transactionTemplate.execute(_ -> {
                 Event event = getEvent(id);
+
+                if (event.getStatus() == EventStatus.ARCHIVED) {
+                    throw new InvalidEventStatusException("Нельзя редактировать архивированное мероприятие");
+                }
 
                 oldBannerUrlHolder[0] = event.getBannerUrl();
 
@@ -117,15 +130,15 @@ public class EventService {
                 if (request.startsAt() != null) event.setStartsAt(request.startsAt());
                 if (request.endsAt() != null) event.setEndsAt(request.endsAt());
 
-                if (uploadedBannerUrl != null) {
-                    event.setBannerUrl(uploadedBannerUrl);
+                if (newBannerUrl != null) {
+                    event.setBannerUrl(newBannerUrl);
                 }
 
                 checkAndTriggerNotification(event);
                 return eventRepository.save(event);
             });
 
-            if (uploadedBannerUrl != null && oldBannerUrlHolder[0] != null) {
+            if (newBannerUrl != null && oldBannerUrlHolder[0] != null) {
                 s3FileStorageService.delete(oldBannerUrlHolder[0]);
             }
 
@@ -143,8 +156,8 @@ public class EventService {
             );
 
         } catch (Exception e) {
-            if (uploadedBannerUrl != null) {
-                s3FileStorageService.delete(uploadedBannerUrl);
+            if (newBannerUrl != null) {
+                s3FileStorageService.delete(newBannerUrl);
             }
             throw e;
         }
@@ -212,6 +225,21 @@ public class EventService {
                 event.getCreatedAt(),
                 event.getUpdatedAt()
         );
+    }
+
+    public void publishEvent(Long id) {
+
+        Event event = getEvent(id);
+
+        switch (event.getStatus()) {
+            case PUBLISHED -> throw new InvalidEventStatusException("Мероприятие уже опубликовано");
+            case ARCHIVED -> throw new InvalidEventStatusException("Нельзя опубликовать архивированное мероприятие");
+            case DRAFT -> transactionTemplate.executeWithoutResult(_ -> {
+                event.setStatus(EventStatus.PUBLISHED);
+                eventRepository.save(event);
+                checkAndTriggerNotification(event);
+            });
+        }
     }
 
     private Event getEvent(Long id) {

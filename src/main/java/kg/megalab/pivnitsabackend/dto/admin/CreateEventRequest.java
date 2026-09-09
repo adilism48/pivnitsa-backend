@@ -1,4 +1,4 @@
-package kg.megalab.pivnitsabackend.dto.event;
+package kg.megalab.pivnitsabackend.dto.admin;
 
 import jakarta.validation.constraints.*;
 import kg.megalab.pivnitsabackend.entity.EventStatus;

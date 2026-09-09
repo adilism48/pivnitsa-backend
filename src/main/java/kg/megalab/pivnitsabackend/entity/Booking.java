@@ -35,6 +35,9 @@ public class Booking {
     @Column(name = "status", nullable = false)
     private BookingStatus status;
 
+    @Column(name = "cancellation_reason")
+    private String cancellationReason;
+
     @Column(name = "amount", nullable = false)
     private BigDecimal amount;
 
