@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import java.time.OffsetDateTime;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.time.ZoneOffset;
 
 @Service
 public class BookingDateValidator {
@@ -26,8 +27,10 @@ public class BookingDateValidator {
     }
 
     private void validateBookingTime(OffsetDateTime bookingAt) {
-        DayOfWeek dayOfWeek = bookingAt.getDayOfWeek();
-        LocalTime time = bookingAt.toLocalTime();
+        OffsetDateTime bishkekTime = bookingAt.withOffsetSameInstant(ZoneOffset.of("+06:00"));
+
+        DayOfWeek dayOfWeek = bishkekTime.getDayOfWeek();
+        LocalTime time = bishkekTime.toLocalTime();
 
         LocalTime start;
         LocalTime end;

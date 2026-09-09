@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +39,9 @@ public class BookingService {
         ClubTable bookingTable = clubTableRepository.findById(request.clubTableId())
                 .orElseThrow(() -> new TableNotFoundException("Столик не найден"));
 
-        OffsetDateTime[] range = unavailabilityChecker.toDayRange(request.bookingAt().toLocalDate());
+        OffsetDateTime bishkekBookingAt = request.bookingAt().withOffsetSameInstant(ZoneOffset.of("+06:00"));
+        OffsetDateTime[] range = unavailabilityChecker.toDayRange(bishkekBookingAt.toLocalDate());
+
         if (unavailabilityChecker.isUnavailable(bookingTable, range[0], range[1])) {
             throw new TableUnavailableException("Столик недоступен на выбранную дату");
         }
