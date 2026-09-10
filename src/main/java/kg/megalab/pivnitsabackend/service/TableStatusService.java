@@ -65,7 +65,8 @@ public class TableStatusService {
                 table.getPositionX(),
                 table.getPositionY(),
                 table.getHallId(),
-                table.getCategory()
+                table.getCategory(),
+                table.getDepositAmount()
         );
     }
 }

@@ -13,6 +13,7 @@ public record TableStatusResponse(
         BigDecimal positionX,
         BigDecimal positionY,
         Long hallId,
-        String category
+        String category,
+        BigDecimal depositAmount
 ) {
 }
